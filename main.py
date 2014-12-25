@@ -12,20 +12,15 @@ import signal
 import time
 import boto.sqs
 import boto.sns
+import boto.dynamo
+import config
+import pylibmc
 
 from tornado.httpserver import HTTPServer
-
 
 """ Tornado App Configuration
 
 """
-
-def aws_account():
-    aws_access_id = 'AKIAJNDFKACQ6253GVXQ'
-    aws_access_key = 'uOvbYfrPeE3hkNIHy9PZrPVNq445nmdPQkl6f33h'
-
-    return aws_access_id, aws_access_key
-
 
 def get_url_list():
 
@@ -45,23 +40,36 @@ def get_settings():
 
 def get_sqs():
     
-    aws_access_id, aws_access_key = aws_account()
-
     conn = boto.sqs.connect_to_region(
         'us-west-2',
-        aws_access_key_id=aws_access_id,
-        aws_secret_access_key=aws_access_key)
+        aws_access_key_id=config.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=config.AWS_ACCESS_KEY)
     return conn
 
 def get_sns():
 
-    aws_access_id, aws_access_key = aws_account()
-
     conn = boto.sns.connect_to_region(
         'us-west-2',
-        aws_access_key_id=aws_access_id,
-        aws_secret_access_key=aws_access_key)
+        aws_access_key_id=config.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=config.AWS_ACCESS_KEY)
     return conn
+
+def get_dynamo():
+
+    conn = boto.dynamo.connect_to_region(
+        'us-west-2',
+        aws_access_key_id=config.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=config.AWS_ACCESS_KEY)
+    return conn
+
+def get_memcache():
+    return pylibmc.Client(
+        [config.MEMCACHE_ADDRESS], 
+        binary=True, 
+        behaviors={
+        "tcp_nodelay": True,
+        "ketama": True})
+
 
 def get_app():
 
@@ -69,11 +77,15 @@ def get_app():
     settings = get_settings()
     sqs = get_sqs()
     sns = get_sns()
+    dynamo = get_dynamo()
+    memcache = get_elastic_cache()
 
     application = tornado.web.Application (
         url_list,
         sqs = sqs,
         sns = sns,
+        dynamo = dynamo,
+        memcache = memcache
         **settings
     )
     
