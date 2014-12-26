@@ -5,17 +5,11 @@ import boto.dynamodb
 from tornado import gen
 from .base_handler import BaseHandler
 
-
-
-class clientHandler(BaseHandler):
-
 	@gen.coroutine
 	def addEndpoint(self):
-		clientData = self.data
-		deviceToken = clientData['deviceToken']
-		awsIosAppArn = 'arn:aws:sns:us-west-2:878165105740:app/APNS_SANDBOX/CarlorDev'
+		deviceToken = self.data['deviceToken']
 		response = self.sns.create_platform_endpoint(
-			awsIosAppArn,
+			AWS_SNS_IOS_APP_ARN,
 			deviceToken
 			)
 		awsEndPointArn = response['CreatePlatformEndpointResponse']['CreatePlatformEndpointResult']['EndpointArn']
@@ -30,10 +24,10 @@ class clientHandler(BaseHandler):
 
 	@gen.coroutine
 	def storeUser(self):
-		awsEndPointArn = self.addEndpoint
+		awsEndpointArn = self.addEndpoint
 		DB = getDynamoDB()
 		table = DB.get_table('User_APNs_SNS_Table')
 		userID = uuid.uuid1();
-		attrs = {'UserID' : userID, 'SNSToken' : self.data['deviceToken'], 'awsEndPointArn' : awsEndPointArn}
+		attrs = {'UserID' : userID, 'SNSToken' : self.data['deviceToken'], 'awsEndpointArn' : awsEndpointArn}
 		item = table.new_item(attrs=attrs)
 		
