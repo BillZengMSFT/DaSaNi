@@ -1,7 +1,7 @@
 #encoding: utf-8
 
 import tornado
-import config
+from .config import *
 from tornado import gen
 from .base_handler import *
 
@@ -11,7 +11,7 @@ class ClientHandler(BaseHandler):
 		clientData = self.data
 		deviceToken = clientData['deviceToken']
 		response = self.sns.create_platform_endpoint(
-			config.AWS_SNS_IOS_APP_ARN,
+			AWS_SNS_IOS_APP_ARN,
 			deviceToken
 			)
 		awsEndPointArn = response['CreatePlatformEndpointResponse']['CreatePlatformEndpointResult']['EndpointArn']
@@ -25,7 +25,7 @@ class ClientHandler(BaseHandler):
 	@gen.coroutine
 	def post(self):
 		awsEndPointArn = self.addSNSAppEndpoint()
-		table = self.dynamo.get_table(config.USER_APNS_SNS_TABLE)
+		table = self.dynamo.get_table(USER_APNS_SNS_TABLE)
 		userID = self.current_user
 		attrs = {
 			'UserID' : userID, 
@@ -41,7 +41,7 @@ class ClientHandler(BaseHandler):
 	Delete sns subcription to App
 """
 	
-	
+
 	
 
 
