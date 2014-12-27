@@ -3,8 +3,7 @@ __pycache__/
 *.py[cod]
 *.pyc
 */*.pyc
-venv/*
-venv/*/*
+
 
 # C extensions
 *.so

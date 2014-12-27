@@ -4,7 +4,7 @@ import tornado
 import json
 from tornado import gen
 from dynamo import User
-
+from functools import wraps
 
 class BaseHandler(tornado.web.RequestHandler):
 
@@ -53,7 +53,7 @@ class BaseHandler(tornado.web.RequestHandler):
         else:
             user = yield User.verify_token(
                 username_or_token,
-                pwd_or_userid
+                pwd_or_userid,
                 self.memcache)
 
         if user:

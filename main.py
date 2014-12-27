@@ -12,12 +12,13 @@ import signal
 import time
 import boto.sqs
 import boto.sns
-import boto.dynamo
-import config
+import boto.dynamodb
 import pylibmc
 
 from tornado.httpserver import HTTPServer
+
 from doodle import ClientHandler
+from doodle import config
 
 """ Tornado App Configuration
 
@@ -26,7 +27,7 @@ from doodle import ClientHandler
 def get_url_list():
 
     return [
-        tornado.web.URLSpec(r'/sns', ClientHandler),
+        
     ]
 
 
@@ -42,7 +43,7 @@ def get_settings():
 def get_sqs():
     
     conn = boto.sqs.connect_to_region(
-        'us-west-2',
+        config.AWS_REGION,
         aws_access_key_id=config.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=config.AWS_ACCESS_KEY)
     return conn
@@ -50,15 +51,15 @@ def get_sqs():
 def get_sns():
 
     conn = boto.sns.connect_to_region(
-        'us-west-2',
+        config.AWS_REGION,
         aws_access_key_id=config.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=config.AWS_ACCESS_KEY)
     return conn
 
 def get_dynamo():
 
-    conn = boto.dynamo.connect_to_region(
-        'us-west-2',
+    conn = boto.dynamodb.connect_to_region(
+        config.AWS_REGION,
         aws_access_key_id=config.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=config.AWS_ACCESS_KEY)
     return conn
@@ -80,14 +81,14 @@ def get_app():
     sns = get_sns()
 
     dynamo = get_dynamo()
-    memcache = get_elastic_cache()
+    memcache = get_memcache()
 
     application = tornado.web.Application (
         url_list,
         sqs = sqs,
         sns = sns,
         dynamo = dynamo,
-        memcache = memcache
+        memcache = memcache,
         **settings
     )
     
