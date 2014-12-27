@@ -39,12 +39,11 @@ class ClientHandler(BaseHandler):
 		item = self.table.new_item(attrs=attrs)
 		item.put()
 
-
-
 """
     Delete sns subcription to App
 """
 
+	
 
 
 

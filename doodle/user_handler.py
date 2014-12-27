@@ -5,6 +5,7 @@ from tornado import gen
 from dynamo import User
 from .base_handler import BaseHandler
 import time
+import re
 from config import *
 from werkzeug.security import generate_password_hash
 
@@ -17,13 +18,13 @@ class UserHandler(BaseHandler):
     @gen.coroutine
     def post(self):
 
-        # TODO
-        # Check if there is any invalid field in the data
+        self.input_firewall(self.data)
 
         # Get email from client and hash it
 
         password = self.data['password']
         email = self.data['email'].strip()
+
         m = hashlib.md5()
         m.update(email.encode("utf-8"))
         hashed_userid = m.hexdigest()
@@ -52,6 +53,9 @@ class UserHandler(BaseHandler):
             "Email"     : self.data["email"],
             "Major"     : self.data["major"],
             "School"    : self.data["college"],
+            "firstname" : self.data['firstname'],
+            "lastname"  : self.data['lastname'],
+            "gender"    : self.data['gender']
         }
         
         # Create new user item and upload it to database
@@ -75,6 +79,7 @@ class UserHandler(BaseHandler):
     @async_login_required
     @gen.coroutine
     def put(self):
+        self.input_firewall(self.data)
         user_data = self.table.get_item(self.current_user)
         # TODO
         # Check if there is any invalid field in the data
@@ -91,9 +96,72 @@ class UserHandler(BaseHandler):
         userid = self.current_user
         user_data = self.table.get_item(userid)
         # filter output information
+        user_data = self.output_firewall(user_data)
         self.write_json({
             'user': user_data
         })
+
+
+    """
+        Take input dict and validate input dict
+    """
+
+    def input_firewall(input_dict):
+        outside_field_names = [
+            'firstname',
+            'lastname',
+            'gender',
+            'college',
+            'major',
+            'email',
+            'birthday',
+            'password',
+            'phone',
+            'signature',
+            'driver',
+            'license'
+        ]
+
+        for key, val in input_dict.items():
+            if key not in outside_field_names or len(val) > 20:
+                raise tornado.web.HTTPError(400, "Invalid Field: "+key)
+            if key == 'phone' and not re.match('/d{3}-/d{3}-/d{4}', val):
+                raise tornado.web.HTTPError(400, "Invalid Field: "+key)
+            if key == 'email' and not re.match('/s+@/s+.edu', val)
+                raise tornado.web.HTTPError(400, "Invalid Field: "+key)
+
+    """
+        Take output dict and return filtered dict
+    """
+
+    def output_firewall(output_dict):
+        legal_field_names = [
+            'FirstName',
+            'LastName',
+            'Birthday',
+            'Email',
+            'Phone',
+            'School',
+            'Major',
+            'Gender',
+            'Signature',
+            'Driver',
+            'DriverLicense',
+            'CarID',
+            'PhotoID'
+        ]
+
+        filtered_output = {}
+        for key, val in output_dict:
+            if key in legal_field_names:
+                filtered_output[key] = val
+
+        return filtered_output
+
+
+
+
+
 
 
 

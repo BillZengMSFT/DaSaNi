@@ -28,6 +28,19 @@ class BaseHandler(tornado.web.RequestHandler):
     def data(self):
         return json.loads(self.request.body.decode('utf-8'))
 
+    """ TODO For Every Handler
+        filter out every input dictionary
+    """
+
+    def input_firewall(input_dict):
+        pass
+
+    """ TODO For Every Handler
+        filter out every output dictionary
+    """
+
+    def output_firewall(input_dict):
+        pass
 
     """ User token authorization
             user here is user id
@@ -65,6 +78,12 @@ class BaseHandler(tornado.web.RequestHandler):
     """ Helper Function
 
     """ 
+
+    def _handle_request_exception(self, e):
+        err_status, err_msg = request_exception(e)
+        self.set_status(err_status)
+        self.set_header("Content-Type", "application/json")
+        self.finish({'error' : err_msg})
 
     def write_json(self, data):
         self.set_header("Content-Type", "application/json")
