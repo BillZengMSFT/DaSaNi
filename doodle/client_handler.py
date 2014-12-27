@@ -7,7 +7,11 @@ from .base_handler import BaseHandler
 
 
 
-class clientHandler(BaseHandler):
+class ClientHandler(BaseHandler):
+
+	def post(self):
+		self.addEndpoint()
+		return
 
 	@gen.coroutine
 	def addEndpoint(self):
@@ -18,6 +22,7 @@ class clientHandler(BaseHandler):
 			awsIosAppArn,
 			deviceToken
 			)
+		tornado.log(response)
 		awsEndPointArn = response['CreatePlatformEndpointResponse']['CreatePlatformEndpointResult']['EndpointArn']
 		return awsEndPointArn
 

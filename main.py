@@ -15,6 +15,7 @@ import boto.sns
 
 from tornado.httpserver import HTTPServer
 
+from doodle import ClientHandler
 
 """ Tornado App Configuration
 
@@ -30,7 +31,7 @@ def aws_account():
 def get_url_list():
 
     return [
-        
+        tornado.web.URLSpec(r'/sns', ClientHandler),
     ]
 
 
@@ -69,7 +70,6 @@ def get_app():
     settings = get_settings()
     sqs = get_sqs()
     sns = get_sns()
-
     application = tornado.web.Application (
         url_list,
         sqs = sqs,

@@ -19,5 +19,3 @@ class BaseHandler(tornado.web.RequestHandler):
     @property
     def data(self):
         return json.loads(self.request.body.decode('utf-8'))
-
-    
