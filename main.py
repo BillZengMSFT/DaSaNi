@@ -12,6 +12,7 @@ import signal
 import time
 import boto.sqs
 import boto.sns
+import boto.ses
 import boto.dynamodb
 import pylibmc
 
@@ -55,6 +56,14 @@ def get_sns():
         aws_secret_access_key=config.AWS_ACCESS_KEY)
     return conn
 
+def get_ses():
+
+    conn = boto.ses.connect_to_region(
+        config.AWS_REGION,
+        aws_access_key_id=config.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=config.AWS_ACCESS_KEY)
+    return conn
+
 def get_dynamo():
 
     conn = boto.dynamodb.connect_to_region(
@@ -78,7 +87,7 @@ def get_app():
     settings = get_settings()
     sqs = get_sqs()
     sns = get_sns()
-
+    ses = get_ses()
     dynamo = get_dynamo()
     memcache = get_memcache()
 
@@ -86,6 +95,7 @@ def get_app():
         url_list,
         sqs = sqs,
         sns = sns,
+        ses = ses,
         dynamo = dynamo,
         memcache = memcache,
         **settings

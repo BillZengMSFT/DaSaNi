@@ -17,6 +17,10 @@ class BaseHandler(tornado.web.RequestHandler):
         return self.settings['sns']
 
     @property 
+    def ses(self):
+        return self.settings['ses']
+
+    @property 
     def dynamo(self):
         return self.settings['dynamo']
 

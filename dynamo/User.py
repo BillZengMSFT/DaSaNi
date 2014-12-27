@@ -1,6 +1,10 @@
 
 
 from tornado import gen
+from config import *
+
+import hashlib
+import time
 
 # User Model
 
@@ -46,5 +50,10 @@ def verify_token(token, userid, memcache):
     return None
 
 
-def create_token(hashed_userid):
-    pass
+def create_token(hashed_userid, memcache):
+    m = hashlib.md5()
+    m.update(hashed_userid + COOKIE_SECRET + str(time.time()).split(".")[0])
+    token = m.hexdigest()
+    
+    return token
+    
