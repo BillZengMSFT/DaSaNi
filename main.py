@@ -25,12 +25,14 @@ from doodle import *
 
 """
 
+
 def get_url_list():
 
     client_handler_url_set = [
         # register a device to App
         tornado.web.URLSpec(r"/api/v1/client/registry",ClientHandler),
     ]
+
 
     user_handler_url_set = [
         # create a new user
@@ -118,24 +120,23 @@ def get_settings():
 def get_sqs():
     
     conn = boto.sqs.connect_to_region(
-        config.AWS_REGION,
+        'us-west-2',
         aws_access_key_id=config.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=config.AWS_ACCESS_KEY)
     return conn
 
 def get_dynamo():
-    
-    aws_access_id, aws_access_key = aws_account()
-
+   
     conn = boto.dynamodb.connect_to_region(
         'us-west-2',
-        aws_access_key_id=aws_access_id
-        aws_secret_access_key=aws_access_key)
+        aws_access_key_id=config.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=config.AWS_ACCESS_KEY)
     return conn
 
 def get_sns():
 
     conn = boto.sns.connect_to_region(
+
         config.AWS_REGION,
         aws_access_key_id=config.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=config.AWS_ACCESS_KEY)
@@ -155,6 +156,7 @@ def get_dynamo():
         config.AWS_REGION,
         aws_access_key_id=config.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=config.AWS_ACCESS_KEY)
+
     return conn
 
 
@@ -174,13 +176,12 @@ def get_app():
     sns = get_sns()
     dynamo = get_dynamo()
     memcache = get_memcache()
+    
     application = tornado.web.Application (
         url_list,
         sqs = sqs,
         sns = sns,
         ses = ses,
-=======
->>>>>>> correct client_handler and add attributes to app
         dynamo = dynamo,
         memcache = memcache,
         **settings
