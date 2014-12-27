@@ -123,6 +123,16 @@ def get_sqs():
         aws_secret_access_key=config.AWS_ACCESS_KEY)
     return conn
 
+def get_dynamo():
+    
+    aws_access_id, aws_access_key = aws_account()
+
+    conn = boto.dynamodb.connect_to_region(
+        'us-west-2',
+        aws_access_key_id=aws_access_id
+        aws_secret_access_key=aws_access_key)
+    return conn
+
 def get_sns():
 
     conn = boto.sns.connect_to_region(
@@ -147,6 +157,7 @@ def get_dynamo():
         aws_secret_access_key=config.AWS_ACCESS_KEY)
     return conn
 
+
 def get_memcache():
     return pylibmc.Client(
         [config.MEMCACHE_ADDRESS], 
@@ -155,22 +166,21 @@ def get_memcache():
         "tcp_nodelay": True,
         "ketama": True})
 
-
 def get_app():
 
     url_list = get_url_list()
     settings = get_settings()
     sqs = get_sqs()
     sns = get_sns()
-    ses = get_ses()
     dynamo = get_dynamo()
     memcache = get_memcache()
-
     application = tornado.web.Application (
         url_list,
         sqs = sqs,
         sns = sns,
         ses = ses,
+=======
+>>>>>>> correct client_handler and add attributes to app
         dynamo = dynamo,
         memcache = memcache,
         **settings
