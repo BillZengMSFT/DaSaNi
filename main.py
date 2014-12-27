@@ -34,7 +34,6 @@ def get_url_list():
 def get_settings():
 
     return {
-        'cookie_secret': '_&xC#!~-2987UYWq|{RClubCIL}o><?[]axWERFC@',
         'login_url': '/api_v1/login',
         'debug': True
     }

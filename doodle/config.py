@@ -11,3 +11,6 @@ MEMCACHE_ADDRESS = '127.0.0.1'
 
 
 USER_APNS_SNS_TABLE = 'User_APNs_SNS_Table'
+USER_TABLE = 'User_Table'
+
+COOKIE_SECRET = '_&xC#!~-2987UYWq|{RClubCIL}o><?[]axWERFC@'

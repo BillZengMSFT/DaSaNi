@@ -4,10 +4,13 @@ import tornado
 from .config import *
 from tornado import gen
 from .base_handler import *
-from tornado.log import logging
-from logging import debug as log
 
 class ClientHandler(BaseHandler):
+
+	@property
+	def table(self):
+		return self.dynamo.get_table(USER_APNS_SNS_TABLE)
+
 
 	def addSNSAppEndpoint(self):
 		clientData = self.data
@@ -27,14 +30,13 @@ class ClientHandler(BaseHandler):
 	@gen.coroutine
 	def post(self):
 		awsEndPointArn = self.addSNSAppEndpoint()
-		table = self.dynamo.get_table(USER_APNS_SNS_TABLE)
 		userID = self.current_user
 		attrs = {
 			'UserID' : userID, 
 			'APNsToken' : self.data['deviceToken'], 
 			'SNSToken' : awsEndPointArn
 			}
-		item = table.new_item(attrs=attrs)
+		item = self.table.new_item(attrs=attrs)
 		item.put()
 
 

@@ -44,3 +44,7 @@ def verify_token(token, userid, memcache):
     if userid in memcache and memcache[userid] == token:
         return userid
     return None
+
+
+def create_token(hashed_userid):
+    pass
