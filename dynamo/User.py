@@ -57,3 +57,9 @@ def create_token(hashed_userid, memcache):
     
     return token
     
+def create_token(hashed_userid):
+    pass
+    
+
+
+

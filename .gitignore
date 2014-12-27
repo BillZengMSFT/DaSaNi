@@ -6,6 +6,9 @@ __pycache__/
 venv/*
 venv/*/*
 
+.DS_*
+*/.DS_*
+
 # C extensions
 *.so
 
