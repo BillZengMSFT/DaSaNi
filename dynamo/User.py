@@ -33,13 +33,14 @@ import time
 
 
 @gen.coroutine
-def verify_pwd(username, pwd, dynamo):
-    users = dynamo.get_table('users')
-    user = users.get_item(
-        username=username,
-        password=pwd)
-    if user:
-        return user['uid']
+def verify_pwd(email, pwd, dynamo):
+    user_table = dynamo.get_table(USER_TABLE)
+    m = hashlib.md5()
+    m.update(email)
+    user_data = user_table.get_item(
+        m.hexdigest())
+    if user_data["Password"] == pwd:
+        return user_data['UserID']
     else:
         return None
 
@@ -56,9 +57,6 @@ def create_token(hashed_userid, memcache):
     token = m.hexdigest()
     
     return token
-    
-def create_token(hashed_userid):
-    pass
     
 
 

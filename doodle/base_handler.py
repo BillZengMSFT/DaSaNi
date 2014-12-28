@@ -5,6 +5,8 @@ import json
 from tornado import gen
 from dynamo import User
 from functools import wraps
+import hashlib
+from werkzeug.security import generate_password_hash
 
 class BaseHandler(tornado.web.RequestHandler):
 
@@ -57,19 +59,19 @@ class BaseHandler(tornado.web.RequestHandler):
         if scheme.lower() != 'basic':
             return None
 
-        username_or_token, _, pwd_or_userid = token.partition(':')
+        email_or_token, _, pwd_or_userid = token.partition(':')
 
         # Check in Dynamo
-        if pwd:
+        if pwd_or_userid:
             user = yield User.verify_pwd(
-                username_or_token, 
-                pwd_or_userid,
+                email_or_token, 
+                generate_password_hash(pwd_or_userid),
                 self.dynamo)
 
         # Check in Cache
         else:
             user = yield User.verify_token(
-                username_or_token,
+                email_or_token,
                 pwd_or_userid,
                 self.memcache)
 
