@@ -55,7 +55,7 @@ def create_token(hashed_userid, memcache):
     m = hashlib.md5()
     m.update(hashed_userid + COOKIE_SECRET + str(time.time()).split(".")[0])
     token = m.hexdigest()
-    
+    memcache[hashed_userid] = token
     return token
     
 

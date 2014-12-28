@@ -96,7 +96,7 @@ class UserHandler(BaseHandler):
         yield gen.maybe_future(new_user.put())
         yield gen.maybe_future(new_user_activator.put())
 
-        # Use userid to create token and send it back to the client
+        # Only send userid back to the client
 
         self.write_json({
             'userid': hashed_userid,

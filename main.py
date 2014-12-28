@@ -18,7 +18,7 @@ import pylibmc
 
 from tornado.httpserver import HTTPServer
 
-from doodle import ClientHandler
+from doodle import (ClientHandler, UserHandler, ActivateHandler)
 from doodle import config
 
 """ Tornado App Configuration
@@ -28,7 +28,22 @@ from doodle import config
 def get_url_list():
 
     return [
-        
+        # register a device to App
+        tornado.web.URLSpec(r"/api/v1/client/registry",ClientHandler),
+        # create a new user
+        tornado.web.URLSpec(r"/api/v1/user/create",UserHandler),
+        # update user info
+        tornado.web.URLSpec(r"/api/v1/user/update",UserHandler),
+        # get user's info
+        tornado.web.URLSpec(r"/api/v1/user/get",UserHandler),
+        # get other's info
+        tornado.web.URLSpec(r"/api/v1/user/get/(.+)$",UserHandler),
+        # activate account
+        tornado.web.URLSpec(r"/api/v1/user/activate",ActivateHandler),
+        # retrieve activation status
+        tornado.web.URLSpec(r"/api/v1/user/activated",ActivateHandler),
+        # resend an activate email
+        tornado.web.URLSpec(r"/api/v1/user/activate/resend",ActivateHandler),
     ]
 
 
