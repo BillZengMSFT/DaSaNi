@@ -26,12 +26,12 @@ from doodle import *
 
 def get_url_list():
 
-    clienthandler_url_set = [
+    client_handler_url_set = [
         # register a device to App
         tornado.web.URLSpec(r"/api/v1/client/registry",ClientHandler),
     ]
 
-    userhandler_url_set = [
+    user_handler_url_set = [
         # create a new user
         tornado.web.URLSpec(r"/api/v1/user/create",UserHandler),
         # update user info
@@ -42,7 +42,7 @@ def get_url_list():
         tornado.web.URLSpec(r"/api/v1/user/get/(.+)$",UserHandler),
     ]
 
-    activatehandler_url_set = [
+    activate_handler_url_set = [
         # activate account
         tornado.web.URLSpec(r"/api/v1/user/activate",ActivateHandler),
         # retrieve activation status
@@ -51,7 +51,7 @@ def get_url_list():
         tornado.web.URLSpec(r"/api/v1/user/activate/resend",ActivateHandler),
     ]
 
-    authhandler_url_set = [
+    auth_handler_url_set = [
         # log in
         tornado.web.URLSpec(r"/api/v1/auth/login",AuthHandler),
         # log out
@@ -59,10 +59,10 @@ def get_url_list():
     ]
 
     return (
-        clienthandler_url_set + 
-        userhandler_url_set +
-        activatehandler_url_set +
-        authhandler_url_set
+        client_handler_url_set + 
+        user_handler_url_set +
+        activate_handler_url_set +
+        auth_handler_url_set
     )
 
 

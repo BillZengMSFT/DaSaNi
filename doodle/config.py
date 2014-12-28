@@ -14,6 +14,7 @@ USER_APNS_SNS_TABLE = 'User_APNs_SNS_Table'
 USER_TABLE = 'User_Table'
 USER_TOPIC_TABLE = 'User_Topic_Table'
 ACTIVATE_TABLE = 'User_Activate_Table'
+USER_FRIEND_TABLE = 'User_Friend_Table'
 
 COOKIE_SECRET = '_&xC#!~-2987UYWq|{RClubCIL}o><?[]axWERFC@'
 
