@@ -1,6 +1,10 @@
 
 
 from tornado import gen
+from config import *
+
+import hashlib
+import time
 
 # User Model
 
@@ -29,13 +33,14 @@ from tornado import gen
 
 
 @gen.coroutine
-def verify_pwd(username, pwd, dynamo):
-    users = dynamo.get_table('users')
-    user = users.get_item(
-        username=username,
-        password=pwd)
-    if user:
-        return user['uid']
+def verify_pwd(email, pwd, dynamo):
+    user_table = dynamo.get_table(USER_TABLE)
+    m = hashlib.md5()
+    m.update(email)
+    user_data = user_table.get_item(
+        m.hexdigest())
+    if user_data["Password"] == pwd:
+        return user_data['UserID']
     else:
         return None
 
@@ -46,8 +51,12 @@ def verify_token(token, userid, memcache):
     return None
 
 
-def create_token(hashed_userid):
-    pass
+def create_token(hashed_userid, memcache):
+    m = hashlib.md5()
+    m.update(hashed_userid + COOKIE_SECRET + str(time.time()).split(".")[0])
+    token = m.hexdigest()
+    
+    return token
     
 
 

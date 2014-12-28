@@ -8,12 +8,18 @@ import time
 import re
 from config import *
 from werkzeug.security import generate_password_hash
+import hashlib
+from .helper import send_email
 
 class UserHandler(BaseHandler):
 
     @property
     def table(self):
         return self.dynamo.get_table(User_Table)
+
+    @property
+    def activate_table(self):
+        return self.dynamo.get_table(Activate_Table)
 
     @gen.coroutine
     def post(self):
@@ -64,14 +70,36 @@ class UserHandler(BaseHandler):
             hash_key=hashed_userid,
             range_key=None,
             attrs=attrs)
+
+        # Send activate email
+        try:
+            activate_code = send_email(self.ses,self.data["email"],self.data["first_name"],self.data["last_name"])
+        except:
+            self.send_error(400)
+            return
+
+        activator_attrs = {
+            "UserID"    : hashed_userid,
+            "Time"      : time.time(),
+            "Code"      : activate_code,
+            "Attempt"   : 1
+        }
+
+        new_user_activator = self.activate_table.new_item(
+            hash_key=hashed_userid,
+            range_key=None,
+            attrs=activator_attrs
+            )
+
+        # Upload new user information and activator to AWS
+
         yield gen.maybe_future(new_user.put())
+        yield gen.maybe_future(new_user_activator.put())
 
         # Use userid to create token and send it back to the client
 
-        token = User.create_token(hashed_userid)
         self.write_json({
-            'token': token.decode('utf-8'),
-            'user': hashed_userid,
+            'userid': hashed_userid,
         })
 
 
@@ -157,6 +185,7 @@ class UserHandler(BaseHandler):
                 filtered_output[key] = val
 
         return filtered_output
+
 
 
 
