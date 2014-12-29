@@ -7,6 +7,7 @@ from dynamo import User
 from functools import wraps
 import hashlib
 from werkzeug.security import generate_password_hash
+from tornado.escape import json_encode
 
 class BaseHandler(tornado.web.RequestHandler):
 
@@ -85,11 +86,11 @@ class BaseHandler(tornado.web.RequestHandler):
 
     """ 
 
-    def _handle_request_exception(self, e):
-        err_status, err_msg = request_exception(e)
-        self.set_status(err_status)
-        self.set_header("Content-Type", "application/json")
-        self.finish({'error' : err_msg})
+    # def _handle_request_exception(self, e):
+    #     err_status, err_msg = request_exception(e)
+    #     self.set_status(err_status)
+    #     self.set_header("Content-Type", "application/json")
+    #     self.finish({'error' : err_msg})
 
     def write_json(self, data):
         self.set_header("Content-Type", "application/json")

@@ -16,9 +16,9 @@ class AuthHandler(BaseHandler):
     def sns_table(self):
         self.dynamo.get_table(USER_APNS_SNS_TABLE)
 
-"""
-    User Login and re-subscribe users topics
-"""
+    """
+        User Login and re-subscribe users topics
+    """
     
     @gen.coroutine
     def post(self):
@@ -56,9 +56,9 @@ class AuthHandler(BaseHandler):
             })
 
 
-"""
-    User Logout and un-subrscribe users topics
-"""
+    """
+        User Logout and un-subrscribe users topics
+    """
 
     @async_login_required
     @gen.coroutine

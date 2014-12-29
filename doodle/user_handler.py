@@ -1,43 +1,42 @@
+#encoding: utf-8
+
 import tornado
 import json
 import werkzeug
 from tornado import gen
 from dynamo import User
-from .base_handler import BaseHandler
+from .base_handler import *
 import time
 import re
-from config import *
+from .config import *
 from werkzeug.security import generate_password_hash
 import hashlib
-from .helper import send_email
+from .helper import *
 
 class UserHandler(BaseHandler):
 
     @property
     def table(self):
-        return self.dynamo.get_table(User_Table)
+        return self.dynamo.get_table(USER_TABLE)
 
     @property
     def activate_table(self):
-        return self.dynamo.get_table(Activate_Table)
+        return self.dynamo.get_table(ACTIVATE_TABLE)
 
     @gen.coroutine
     def post(self):
 
         self.input_firewall(self.data)
-
         # Get email from client and hash it
 
         password = self.data['password']
         email = self.data['email'].strip()
 
-        m = hashlib.md5()
-        m.update(email.encode("utf-8"))
-        hashed_userid = m.hexdigest()
-
+        hashed_userid = md5(email)
         # Check if this email has been registered
-
-        user_exist = self.user_table.has_item(hashed_userid)
+        
+        
+        user_exist = yield gen.maybe_future(self.table.has_item(hashed_userid))
 
         if user_exist is True:
 
@@ -54,37 +53,41 @@ class UserHandler(BaseHandler):
         # Build attrs for the new user
 
         attrs = {
-            "UserID"    : hashed_userid,
             "Password"  : hashed_password,
             "Email"     : self.data["email"],
             "Major"     : self.data["major"],
             "School"    : self.data["college"],
-            "firstname" : self.data['firstname'],
-            "lastname"  : self.data['lastname'],
-            "gender"    : self.data['gender']
+            "Firstname" : self.data['firstname'],
+            "Lastname"  : self.data['lastname'],
+            "Gender"    : self.data['gender']
         }
-        
+        print(attrs["Gender"])
         # Create new user item and upload it to database
-
         new_user = self.table.new_item(
             hash_key=hashed_userid,
             range_key=None,
-            attrs=attrs)
-
+            attrs=attrs
+            )
         # Send activate email
         try:
-            activate_code = send_email(self.ses,self.data["email"],self.data["first_name"],self.data["last_name"])
+            activate_code = yield gen.maybe_future(
+                send_email(
+                    self.ses,
+                    self.data["email"],
+                    self.data["firstname"],
+                    self.data["lastname"]
+                )
+            )
         except:
-            self.send_error(400)
+            self.set_status(400)
             return
 
         activator_attrs = {
-            "UserID"    : hashed_userid,
-            "Time"      : time.time(),
+            "Time"      : str(time.time()).split(".")[0],
             "Code"      : activate_code,
             "Attempt"   : 1
         }
-
+        
         new_user_activator = self.activate_table.new_item(
             hash_key=hashed_userid,
             range_key=None,
@@ -92,10 +95,8 @@ class UserHandler(BaseHandler):
             )
 
         # Upload new user information and activator to AWS
-
         yield gen.maybe_future(new_user.put())
         yield gen.maybe_future(new_user_activator.put())
-
         # Only send userid back to the client
 
         self.write_json({
@@ -134,7 +135,8 @@ class UserHandler(BaseHandler):
         Take input dict and validate input dict
     """
 
-    def input_firewall(input_dict):
+    def input_firewall(self,input_dict):
+
         outside_field_names = [
             'firstname',
             'lastname',
@@ -151,18 +153,29 @@ class UserHandler(BaseHandler):
         ]
 
         for key, val in input_dict.items():
-            if key not in outside_field_names or len(val) > 20:
-                raise tornado.web.HTTPError(400, "Invalid Field: "+key)
-            if key == 'phone' and not re.match('/d{3}-/d{3}-/d{4}', val):
-                raise tornado.web.HTTPError(400, "Invalid Field: "+key)
-            if key == 'email' and not re.match('/s+@/s+.edu', val)
-                raise tornado.web.HTTPError(400, "Invalid Field: "+key)
+            
+            if key == "email" and len(val)>50:
+                self.set_status(400)
+                self.write_json({ "result":"Invalid Field: "+key})
+            if key not in outside_field_names or (key != "email" and key != "gender" and len(val)> 20):
+                self.set_status(400)
+                self.write_json({ "result":"Invalid Field: "+key})
+            if key == 'phone' and not re.match('\d{3}-\d{3}-\d{4}', val):
+                self.set_status(400)
+                self.write_json({ "result":"Invalid Field: "+key})
+            if key == 'email' and not re.match(r'[a-zA-Z0-9]+@[a-z]+\.edu', val):
+                self.set_status(400)
+                self.write_json({ "result":"Invalid Field: "+key})
+
+
+
+
 
     """
         Take output dict and return filtered dict
     """
 
-    def output_firewall(output_dict):
+    def output_firewall(self,output_dict):
         legal_field_names = [
             'FirstName',
             'LastName',

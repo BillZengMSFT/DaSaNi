@@ -1,19 +1,21 @@
+#encoding: utf-8
+
 import tornado
 import json
 from tornado import gen
 from .base_handler import BaseHandler
-from config import *
-
+from .config import *
+from .helper import *
 
 
 class ActivateHandler(BaseHandler):
     @property
     def table(self):
-        return self.dynamo.get_table(User_Table)
+        return self.dynamo.get_table(USER_TABLE)
 
     @property
     def activate_table(self):
-        return self.dynamo.get_table(Activate_Table)
+        return self.dynamo.get_table(ACTIVATE_TABLE)
 
     @gen.coroutine
     def post(self):
@@ -54,14 +56,14 @@ class ActivateHandler(BaseHandler):
         user_data = yield gen.maybe_future(self.table.get_item(userid))
         try:
             activate_code = send_email(
-                self.ses,user_data["Email"],
-                user_data["FirstName"],
-                user_data["LastName"])
+                self.ses,
+                user_data["Email"],
+                user_data["Firstname"],
+                user_data["Lastname"])
         except:
             self.write_json({
-                'result':"ok"
+                'result':"fail"
             })
-            self.send_error(400)
             return
         # update dynamo
 

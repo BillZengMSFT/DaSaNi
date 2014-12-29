@@ -1,4 +1,4 @@
-
+#encoding: utf-8
 AWS_REGION = 'us-west-2'
 
 
