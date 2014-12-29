@@ -80,6 +80,19 @@ class FriendHanlder(BaseHandler):
         self.write_json(response)
 
 
+    @async_login_required
+    @gen.coroutine
+    def test_friendship(self):
+        client_data = self.data
+        friend_user_id = client_data['friend']
+        current_user_id = self.current_user
+        current_user = self.table.get_item(current_user_id)
+        rel_friend = re.search(friend_user_id, current_user['FriendList'])
+        if rel_friend == None:
+            self.write_json({'result' : 'NO'})
+        else:
+            self.write_json({'result' : 'YES'})
+
 
 def user_object_filter(Object):
     legal_field_names = [
