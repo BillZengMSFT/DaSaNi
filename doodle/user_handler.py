@@ -38,7 +38,7 @@ class UserHandler(BaseHandler):
         
         user_exist = yield gen.maybe_future(self.table.has_item(hashed_userid))
 
-        if user_exist is True:
+        if user_exist == True:
 
             # tell client and stop processing this request
             self.write_json({
@@ -53,13 +53,15 @@ class UserHandler(BaseHandler):
         # Build attrs for the new user
 
         attrs = {
-            "Password"  : hashed_password,
-            "Email"     : self.data["email"],
-            "Major"     : self.data["major"],
-            "School"    : self.data["college"],
-            "Firstname" : self.data['firstname'],
-            "Lastname"  : self.data['lastname'],
-            "Gender"    : self.data['gender']
+            "Password"      : hashed_password,
+            "Email"         : self.data["email"],
+            "Major"         : self.data["major"],
+            "School"        : self.data["college"],
+            "Firstname"     : self.data['firstname'],
+            "Lastname"      : self.data['lastname'],
+            "Gender"        : self.data['gender'],
+            "AccountActive" : False,
+            "TopicList"     : "",
         }
         print(attrs["Gender"])
         # Create new user item and upload it to database

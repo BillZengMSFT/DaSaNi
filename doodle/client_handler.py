@@ -31,6 +31,7 @@ class ClientHandler(BaseHandler):
     def post(self):
         aws_endpoint_arn = self.add_sns_app_endpoint()
         userid = self.current_user
+        print(userid)
         attrs = {
             'UserID' : userid, 
             'APNsToken' : self.data['deviceToken'], 
