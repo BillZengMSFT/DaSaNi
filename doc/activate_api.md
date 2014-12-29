@@ -4,7 +4,7 @@
 
 	Activate user accounts, resend activate emails and get activation status
 
-> post : /api/v1/activate
+> post : /api/v1/user/activate
 
 ```
 PAYLOAD:
@@ -14,7 +14,7 @@ PAYLOAD:
     }
 ```
 
-> put : /api/v1/activate/resend
+> put : /api/v1/user/activate/resend
 
 ```
 PAYLOAD:
@@ -23,7 +23,7 @@ PAYLOAD:
     }
 ```
 
-> get : /api/v1/activated
+> get : /api/v1/user/activated
 
 ```
 PAYLOAD:

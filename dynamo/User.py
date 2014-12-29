@@ -1,10 +1,11 @@
-
+#encoding: utf-8
 
 from tornado import gen
-from config import *
+from doodle import config
 
 import hashlib
 import time
+from doodle import config
 
 # User Model
 
@@ -35,10 +36,7 @@ import time
 @gen.coroutine
 def verify_pwd(email, pwd, dynamo):
     user_table = dynamo.get_table(USER_TABLE)
-    m = hashlib.md5()
-    m.update(email)
-    user_data = user_table.get_item(
-        m.hexdigest())
+    user_data = user_table.get_item(md5(email))
     if user_data["Password"] == pwd:
         return user_data['UserID']
     else:
@@ -52,9 +50,7 @@ def verify_token(token, userid, memcache):
 
 
 def create_token(hashed_userid, memcache):
-    m = hashlib.md5()
-    m.update(hashed_userid + COOKIE_SECRET + str(time.time()).split(".")[0])
-    token = m.hexdigest()
+    token = md5(hashed_userid + COOKIE_SECRET + str(time.time()).split(".")[0])
     memcache[hashed_userid] = token
     return token
     
