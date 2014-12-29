@@ -17,6 +17,10 @@ class ChatgroupHandler(BaseHandler):
     def user_topic_table(self):
         return self.dynamo.get_table(USER_TOPIC_TABLE)
 
+    @property 
+    def user_table(self):
+        return self.dynamo.get_table(USER_TABLE)
+
     """
         Create a new chatgroup
     """
@@ -54,20 +58,9 @@ class ChatgroupHandler(BaseHandler):
         item = self.table.new_item(attrs=attrs)
         item.put()
 
-        if self.user_topic_table.has_item(self.current_user):
-            user_topic = self.user_topic.get_item(self.current_user)
-            user_topic['TopicList'] += sns_arn+';'
-            user_topic.put()
-        else:
-            attrs = {
-                'UserID'    : self.current_user,
-                'TopicList' : sns_arn+';'
-            }
-            item = self.user_topic_table.new_item(
-                hash_key=self.current_user, 
-                attrs=attrs
-            )
-            item.put()
+        members = memberlist.split(';')
+        for member in members:
+            self.__add_user_to_topic(member)
 
     """
         accept application / accept invitation / leave  
@@ -76,7 +69,72 @@ class ChatgroupHandler(BaseHandler):
     @async_login_required
     @gen.coroutine
     def put(self):
-        pass
+        client_data = self.data
+        request_type = client_data['type']
+        choice = client_data['choice']
+        chatgroup_id = client_data['chatgroup_id']
+        inbox_id = client_data['inbox_id']
+        if request_type == 'application':
+            self.__chatgroup_application(client_data['who_apply'], chatgroup_id, self.current_user, choice, inbox_id)
+        elif request_type == 'invitation':
+            self.__chatgroup_invitation(client_data['who_invite'], chatgroup_id, self.current_user, choice, inbox_id)
+        elif request_type == 'leave':
+            self.__chatgroup_leave(self.current_user, chatgroup_id, choice, inbox_id)
+
+    """
+        Create or update user's joined topic list
+    """
+
+    def __add_user_to_topic(self, member):
+        if self.user_topic_table.has_item(member):
+                user_topic = self.user_topic.get_item(member)
+                user_topic['TopicList'] += sns_arn+';'
+                user_topic.put()
+            else:
+                attrs = {
+                    'UserID'    : member,
+                    'TopicList' : sns_arn+';'
+                }
+                item = self.user_topic_table.new_item(
+                    hash_key=member, 
+                    attrs=attrs
+                )
+                item.put()
+
+    def __chatgroup_application(self, who_apply, chatgroup_id, who_decide, choice, inbox_id):
+        if choice == 'accept':
+            # update chatgroup member list
+            chatgroup = self.table.get_item(chatgroup_id)
+            chatgroup['MemberList'].append(who_apply+';')
+
+            # push info to others
+            who_to_join = self.user_table.get_item(who_apply)
+            message = who_to_join['Firstname']+' '+who_to_join['Lastname']+' joined this group :)'
+            sns_topic = chatgroup['SNS']
+            self.sns.publish(
+                topic=sns_topic,
+                message=message
+            )
+
+            # subscribe to sns topic
+            
+
+            # add user to topic list
+            self.__add_user_to_topic(who_apply)
+
+        # update inbox status
+
+        # return chatgroup info
+
+
+    def __chatgroup_invitation(self, who_invite, chatgroup_id, who_decide, choice, inbox_id):
+
+
+    def __chatgroup_leave(self, who_leave, chatgroup_id, choice, inbox_id):
+
+
+
+
 
 
 
