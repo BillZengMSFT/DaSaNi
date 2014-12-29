@@ -5,7 +5,6 @@ import time
 from .config import ACTIVATOR_EMAILADDRESS
 
 def send_email(ses, email, fn, ln):
-    print(email)
     code = md5(email+str(time.time()).split(".")[0])
     
     ses.send_email(
