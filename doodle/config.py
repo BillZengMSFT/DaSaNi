@@ -16,6 +16,7 @@ USER_TOPIC_TABLE = 'User_Topic_Table'
 ACTIVATE_TABLE = 'User_Activate_Table'
 USER_FRIEND_TABLE = 'User_Friend_Table'
 USER_INBOX_TABLE = 'User_Inbox_Table'
+CHATGROUP_TABLE = 'Chatgroup_Table'
 
 COOKIE_SECRET = '_&xC#!~-2987UYWq|{RClubCIL}o><?[]axWERFC@'
 

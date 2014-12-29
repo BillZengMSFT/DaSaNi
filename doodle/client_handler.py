@@ -37,7 +37,10 @@ class ClientHandler(BaseHandler):
             'APNsToken' : self.data['deviceToken'], 
             'SNSToken' : aws_endpoint_arn
             }
-        item = self.table.new_item(attrs=attrs)
+        item = self.table.new_item(
+            hash_key=userid
+            attrs=attrs
+        )
         item.put()
 
 

@@ -24,7 +24,10 @@ class InboxHandler(BaseHandler):
             'JsonMessage'   : payload,
             'Timestamp'     : str(time.time()).split('.')[0]
         }
-        item = self.table.new_item(attrs=attrs)
+        item = self.table.new_item(
+            hash_key=UserID,
+            attrs=attrs
+        )
         item.put()
 
     @async_login_required
