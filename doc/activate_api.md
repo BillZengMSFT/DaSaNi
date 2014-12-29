@@ -23,11 +23,8 @@ PAYLOAD:
     }
 ```
 
-> get : /api/v1/user/activated
+> get : /api/v1/user/activated/(uid)
 
 ```
-PAYLOAD:
-    {
-        userid: USERID
-    }
+    Return whethere an given uid is activated or not
 ```

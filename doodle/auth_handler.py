@@ -23,12 +23,11 @@ class AuthHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         client_data = self.data
-        userid = yield verify_pwd(
+        userid = yield User.verify_pwd(
             client_data['email'], 
             client_data['password'],
             self.dynamo
             )
-
         # verify user logged in
         
         if not userid:
@@ -36,7 +35,7 @@ class AuthHandler(BaseHandler):
             return
 
         # split and subscribe user's topics
-
+        '''
         topic_and_subid_string = self.table.get_item(userid)['TopicList']
         topic_and_subid_list = topic_and_subid_string.split(';')
         if not (len(topic_list) == 1 and topic_list[0] == ''):
@@ -46,7 +45,7 @@ class AuthHandler(BaseHandler):
                 #   TODO if gets error
                 topic_arn = topic_and_subid.split('|')[0]
                 yield self.sns.subscribe(topic_arn, "application", endpoint)
-
+                '''
         # set user memcache token
 
         token = User.create_token(userid, self.memcache)
@@ -70,7 +69,7 @@ class AuthHandler(BaseHandler):
             return
 
         # split and unsubscribe user's topics
-
+        '''
         topic_and_subid_string = self.table.get_item(userid)['TopicList']
         topic_and_subid_list = topic_and_subid_string.split(';')
         if not (len(topic_list) == 1 and topic_list[0] == ''):
@@ -80,7 +79,7 @@ class AuthHandler(BaseHandler):
                 #   TODO if gets error
                 subid = topic_and_subid.split('|')[1]
                 yield self.sns.unsubscribe(subid)
-                
+                '''
         # delete user memcache token
 
         del self.memcache[userid]

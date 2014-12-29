@@ -33,12 +33,15 @@ class ActivateHandler(BaseHandler):
         code_is_real =  self.activate_table.has_item(userid)
         if code_is_real:
             activator = yield gen.maybe_future(self.activate_table.get_item(userid))
-            if activator["code"] == code:
+            if activator["Code"] == code:
                 user_data = self.table.get_item(userid)
                 user_data["AccountActive"] = True
                 yield gen.maybe_future(user_data.put())
+                self.write_json({
+                    "result":"success"
+                    })
             else:
-                self.set_error(403)
+                self.send_error(403)
                 return
 
 
@@ -54,6 +57,14 @@ class ActivateHandler(BaseHandler):
         """
         userid = self.data["userid"]
         user_data = yield gen.maybe_future(self.table.get_item(userid))
+        activator = self.activate_table.get_item(userid)
+        
+        activator["Attempt"] = activator["Attempt"] + 1
+        if activator["Attempt"] > 3:
+            self.write_json({
+                'result':"fail: Too many attempts recorded"
+            })
+            return
         try:
             activate_code = send_email(
                 self.ses,
@@ -62,13 +73,13 @@ class ActivateHandler(BaseHandler):
                 user_data["Lastname"])
         except:
             self.write_json({
-                'result':"fail"
+                'result':"fail: Email not sent"
             })
             return
         # update dynamo
 
-        activator = self.activate_table.get_item(userid)
-        activator["code"] = activate_code
+        activator["Code"] = activate_code
+
         yield gen.maybe_future(activator.put())
 
         self.write_json({
@@ -77,18 +88,12 @@ class ActivateHandler(BaseHandler):
 
 
     @gen.coroutine
-    def get(self):
+    def get(self, userid):
         """
             Retrieve if an account is activated or not
-
-            PAYLOAD:
-            {
-                userid: USERID
-            }
         """
-        userid = self.data["userid"]
         user_data = yield gen.maybe_future(self.table.get_item(userid))
-        if user_data["AccountActive"] is True:
+        if user_data["AccountActive"] == True:
             self.write_json({
                 'result':"ok"
             })

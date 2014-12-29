@@ -46,7 +46,7 @@ def get_url_list():
         # activate account
         tornado.web.URLSpec(r"/api/v1/user/activate",ActivateHandler),
         # retrieve activation status
-        tornado.web.URLSpec(r"/api/v1/user/activated",ActivateHandler),
+        tornado.web.URLSpec(r"/api/v1/user/activated/([0-9A-Za-z]+)",ActivateHandler),
         # resend an activate email
         tornado.web.URLSpec(r"/api/v1/user/activate/resend",ActivateHandler),
     ]

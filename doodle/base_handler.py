@@ -62,19 +62,20 @@ class BaseHandler(tornado.web.RequestHandler):
 
         email_or_token, _, pwd_or_userid = token.partition(':')
 
-        # Check in Dynamo
-        if pwd_or_userid:
+
+        # Check in Cache
+        user = yield User.verify_token(
+            email_or_token,
+            pwd_or_userid,
+            self.memcache)
+        if not user:
+            # Check in Dynamo
             user = yield User.verify_pwd(
                 email_or_token, 
                 generate_password_hash(pwd_or_userid),
                 self.dynamo)
 
-        # Check in Cache
-        else:
-            user = yield User.verify_token(
-                email_or_token,
-                pwd_or_userid,
-                self.memcache)
+        
 
         if user:
             return user
