@@ -20,7 +20,7 @@ from doodle import config
     Phone          = str
     School         = str        Indexed
     Major          = str        Indexed
-    Gender         = Binary   male => true  Indexed
+    Gender         = Number   male => true  Indexed
     Signature      = str
     Driver         = bool       Indexed
     EmailActive    = bool
