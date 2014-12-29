@@ -42,7 +42,6 @@ def verify_pwd(email, pwd, dynamo):
         user_data = user_table.get_item(helper.md5(email))
     else:
         return None
-    print(generate_password_hash(pwd),user_data["Password"])
     if user_data["Password"][:len(pwd)-1] == generate_password_hash(pwd)[:len(pwd)-1]:
         return user_data['UserID']
     else:

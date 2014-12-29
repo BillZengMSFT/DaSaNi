@@ -37,6 +37,7 @@ class ActivateHandler(BaseHandler):
                 user_data = self.table.get_item(userid)
                 user_data["AccountActive"] = True
                 yield gen.maybe_future(user_data.put())
+                yield gen.maybe_future(activator.delete())
                 self.write_json({
                     "result":"success"
                     })

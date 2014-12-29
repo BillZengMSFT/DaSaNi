@@ -61,9 +61,8 @@ class UserHandler(BaseHandler):
             "Lastname"      : self.data['lastname'],
             "Gender"        : self.data['gender'],
             "AccountActive" : False,
-            "TopicList"     : "",
+            "TopicList"     : ";",
         }
-        print(attrs["Gender"])
         # Create new user item and upload it to database
         new_user = self.table.new_item(
             hash_key=hashed_userid,
