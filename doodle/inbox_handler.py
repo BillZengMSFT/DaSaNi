@@ -8,7 +8,6 @@ from .base_handler import *
 from helper import *
 from boto.dynamodb.condition import *
 
-
 class InboxHandler(BaseHandler):
 
     @property 

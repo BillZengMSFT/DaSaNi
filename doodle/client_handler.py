@@ -37,7 +37,7 @@ class ClientHandler(BaseHandler):
             'SNSToken' : aws_endpoint_arn
             }
         item = self.table.new_item(
-            hash_key=userid
+            hash_key=userid,
             attrs=attrs
         )
         item.put()
