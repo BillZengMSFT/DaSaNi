@@ -5,13 +5,9 @@ import time
 from .config import *
 from tornado import gen
 from .base_handler import *
-<<<<<<< HEAD
 from helper import *
-from boto.dynamodb.condition.Condition import *
-=======
-import boto.dynamodb
-import boto.dynamodb.condition
->>>>>>> e9cd4ab28ac233fdb37e250bce8437967f3514ea
+from boto.dynamodb.condition import *
+
 
 class InboxHandler(BaseHandler):
 

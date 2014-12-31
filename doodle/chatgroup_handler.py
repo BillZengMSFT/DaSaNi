@@ -215,6 +215,7 @@ class ChatgroupHandler(BaseHandler):
         Delete a chatgroup
             push last message
             Delete sns and sqs
+            Delete members topic
             set specific chatgroup sns and sqs ;
     """
 

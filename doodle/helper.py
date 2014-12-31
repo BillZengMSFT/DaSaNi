@@ -26,3 +26,11 @@ def md5(s):
 
 def hash_password(pwd):
     return generate_password_hash(pwd).split(":")[0]
+
+
+def list_delete_item(list_string, to_remove_string):
+    
+
+
+def list_append_item(list_string, to_append_string):
+    pass
