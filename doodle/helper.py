@@ -54,5 +54,9 @@ def list_append_item(to_append_string, list_string):
 
 
 
+=======
+def list_delete_item(list_string, to_remove_string):
+    pass
+>>>>>>> Stashed changes
 
 

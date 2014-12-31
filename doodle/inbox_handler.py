@@ -5,7 +5,7 @@ import time
 from .config import *
 from tornado import gen
 from .base_handler import *
-from helper import *
+from .helper import *
 from boto.dynamodb.condition import *
 
 class InboxHandler(BaseHandler):
@@ -28,7 +28,7 @@ class InboxHandler(BaseHandler):
             'JsonMessage'   : payload,
             'Timestamp'     : timestamp
         }
-        item = self.table.new_item(
+        item = self.user_inbox_table.new_item(
             hash_key=hash_key,
             attrs=attrs
         )
@@ -38,9 +38,8 @@ class InboxHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         response = []
-        current_user_id = self.current_user
         messages = self.user_inbox_table.scan({
-            'UserID'    :   EQ(current_user_id)
+            'UserID'    :   EQ(self.current_userid)
         })
         for message in messages:
             response.append(message)
