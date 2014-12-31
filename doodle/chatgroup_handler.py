@@ -39,10 +39,10 @@ class ChatgroupHandler(BaseHandler):
     def post(self):
         client_data = self.data
         event_id = ''
-        if client_data.has_key('eventid'):
+        if 'eventid' in client_data:
             event_id = client_data['eventid']
         timestamp = str(time.time()).split('.')[0]
-        chatgroup_id = md5(self.current_user+timestamp)
+        chatgroup_id = md5(self.current_userid+timestamp)
         sqs_response = self.sqs.create_queue(
             chatgroup_id
         )
@@ -54,8 +54,8 @@ class ChatgroupHandler(BaseHandler):
 
         attrs = {
             'ChatgroupID'   : chatgroup_id,
-            'EventID'       : event_id
-            'Name'          : client_data['name']
+            'EventID'       : event_id,
+            'Name'          : client_data['name'],
             'CreatorID'     : self.current_user,
             'MemberList'    : client_data['memberlist'],
             'Capacity'      : client_data['capacity'],
@@ -101,7 +101,7 @@ class ChatgroupHandler(BaseHandler):
     def __add_user_to_topic(self, sns_topic, subscription_arn):
         if self.user_topic_table.has_item(member):
             user_topic = self.user_topic.get_item(member)
-            user_topic['TopicList'] += sns_topic+'|'+subscription_arn+';'
+            user_topic['TopicList'] = list_append_item(sns_topic+'|'+subscription_arn,user_topic['TopicList'])
             user_topic.put()
         else:
             attrs = {
@@ -117,14 +117,26 @@ class ChatgroupHandler(BaseHandler):
     def __chatgroup_application(self, who_apply, chatgroup_id, who_decide, choice, inbox_message_id):
         if choice == 'accept':
             # update chatgroup member list
-            chatgroup = self.chatgroup_table.get_item(chatgroup_id)
+            try:
+                chatgroup = self.chatgroup_table.get_item(chatgroup_id)
+            except:
+                self.set_status(400)
+                self.write_json({
+                    "result" : "fail"
+                    })
             if re.search(who_apply, chatgroup['MemberList']) == None:
-                chatgroup['MemberList'].append(who_apply+';')
+                chatgroup['MemberList'] = list_append_item(chatgroup['MemberList'], who_apply)
 
             sns_topic = chatgroup['SNS']
 
             # subscribe to sns topic
-            user_apns_sns = self.user_apns_sns_table.get_item(who_apply)
+            try:
+                user_apns_sns = self.user_apns_sns_table.get_item(who_apply)
+            except:
+                self.set_status(400)
+                self.write_json({
+                    "result" : "fail"
+                    })
             sns_token = user_apns_sns['SNSToken']
             response = self.sns.subscribe(sns_topic, 'application', sns_token)
             subscription_arn = response['SubscribeResponse']['SubscribeResult']['SubscriptionArn']
@@ -133,7 +145,13 @@ class ChatgroupHandler(BaseHandler):
             self.__add_user_to_topic(sns_topic, subscription_arn)
 
             # push info to others
-            who_to_join = self.user_table.get_item(who_apply)
+            try:
+                who_to_join = self.user_table.get_item(who_apply)
+            except:
+                self.set_status(400)
+                self.write_json({
+                    "result" : "fail"
+                    })
             message = who_to_join['Firstname']+' '+who_to_join['Lastname']+' joined this group :)'
             self.sns.publish(
                 topic=sns_topic,
@@ -141,7 +159,13 @@ class ChatgroupHandler(BaseHandler):
             )
 
         # delete inbox message
-        inbox_message = self.user_inbox_table.get_item(inbox_message_id)
+        try:
+            inbox_message = self.user_inbox_table.get_item(inbox_message_id)
+        except:
+            self.set_status(400)
+            self.write_json({
+                "result" : "fail"
+                })
         inbox_message.delete()
 
         # return chatgroup info
@@ -159,7 +183,13 @@ class ChatgroupHandler(BaseHandler):
 
     def __chatgroup_leave(self, who_leave, chatgroup_id, inbox_message_id):
         # update chatgroup member list to delete user id
-        chatgroup = self.chatgroup_table.get_item(chatgroup_id)
+        try:
+            chatgroup = self.chatgroup_table.get_item(chatgroup_id)
+        except:
+            self.set_status(400)
+            self.write_json({
+                "result" : "fail"
+                })
         if re.search(who_leave, chatgroup['MemberList']) != None:
             members = chatgroup['MemberList'].split(who_leave+';')
             chatgroup['MemberList'] = ''
@@ -169,7 +199,13 @@ class ChatgroupHandler(BaseHandler):
         sns_topic = chatgroup['SNS']
 
         # remove user at topic list
-        user_topic = self.user_topic.get_item(member)
+        try:
+            user_topic = self.user_topic.get_item(member)
+        except:
+            self.set_status(400)
+            self.write_json({
+                "result" : "fail"
+            })
         match = re.search(sns_topic+'.*?;', user_topic['TopicList'])
         if match:
             _, subscription_arn = match.group()[:-1].split('|')
@@ -183,7 +219,13 @@ class ChatgroupHandler(BaseHandler):
             self.sns.unsubscribe(subscription_arn)
 
             # push info to others
-            who_to_leave = self.user_table.get_item(who_leave)
+            try:
+                who_to_leave = self.user_table.get_item(who_leave)
+            except:
+                self.set_status(400)
+                self.write_json({
+                    "result" : "fail"
+                    })
             message = who_to_leave['Firstname']+' '+who_to_leave['Lastname']+' leave this group :)'
             self.sns.publish(
                 topic=sns_topic,
@@ -191,7 +233,13 @@ class ChatgroupHandler(BaseHandler):
             )
 
         # delete inbox message
-        inbox_message = self.user_inbox_table.get_item(inbox_message_id)
+        try:
+            inbox_message = self.user_inbox_table.get_item(inbox_message_id)
+        except:
+            self.set_status(400)
+            self.write_json({
+                "result" : "fail"
+            })
         inbox_message.delete()
 
         # return chatgroup info
@@ -205,7 +253,13 @@ class ChatgroupHandler(BaseHandler):
     @gen.coroutine
     def get(self, chatgroup_id=''):
         response = {}
-        chatgroup = self.chatgroup_table.get_item(chatgroup_id)
+        try:
+            chatgroup = self.chatgroup_table.get_item(chatgroup_id)
+        except:
+            self.set_status(400)
+            self.write_json({
+                "result" : "fail"
+                })
         for key, val in chatgroup.itmes():
             if key != 'SNS':
                 response[key] = val
@@ -224,7 +278,13 @@ class ChatgroupHandler(BaseHandler):
     def delete(self):
         client_data = self.data
         chatgroup_id = client_data['chatgroup_id']
-        chatgroup = self.chatgroup_table.get_item(chatgroup_id)
+        try:
+            chatgroup = self.chatgroup_table.get_item(chatgroup_id)
+        except:
+            self.set_status(400)
+            self.write_json({
+                "result" : "fail"
+                })
         if chatgroup['creator_id'] != self.current_userid:
             self.set_status(400)
             self.write_json({'result' : 'unauthorized to remove chatgroup'})

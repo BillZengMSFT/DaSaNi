@@ -46,13 +46,9 @@ def list_append_item(to_append_string, list_string):
     # handle empty string
     if list_string == '' or list_string == ';':
         list_string = ''
-    list_string += to_append_string
+    match = re.search(to_append_string, list_string)
+    if match != None:
+        return list_string
+    # automatically append ";"
+    list_string += to_append_string + ';'
     return list_string
-
-
-
-
-
-
-
-

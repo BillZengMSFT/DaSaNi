@@ -13,12 +13,12 @@ class AuthHandler(BaseHandler):
         return self.dynamo.get_table(USER_TOPIC_TABLE)
 
     @property 
-    def sns_table(self):
+    def user_apns_sns_table(self):
         return self.dynamo.get_table(USER_APNS_SNS_TABLE)
 
-    """
+    '''
         User Login and re-subscribe users topics
-    """
+    '''
     
     @gen.coroutine
     def post(self):
@@ -33,7 +33,7 @@ class AuthHandler(BaseHandler):
         if not userid:
             self.set_status(403)
             self.write_json({
-                "result" : "Authantication failed"
+                'result' : 'Authantication failed'
                 })
             return
 
@@ -44,24 +44,24 @@ class AuthHandler(BaseHandler):
             topic_and_subid_list = topic_and_subid_string.split(';')
             topic_and_subid_list = topic_and_subid_string.split(';')
             if not (len(topic_and_subid_list) == 2 and topic_and_subid_list[0] == ''):
-                endpoint_info = yield gen.maybe_future(self.sns_table.get_item(client_data['apns']))
+                endpoint_info = yield gen.maybe_future(self.user_apns_sns_table.get_item(client_data['apns']))
                 endpoint = endpoint_info['APNsToken']
                 for topic_and_subid in topic_and_subid_list:
                     #   TODO if gets error
                     topic_arn = topic_and_subid.split('|')[0]
-                    yield gen.maybe_future(self.sns.subscribe(topic_arn, "application", endpoint))
+                    yield gen.maybe_future(self.sns.subscribe(topic_arn, 'application', endpoint))
         # set user memcache token
 
         token = User.create_token(userid, self.memcache)
         self.write_json({
-            "result" : "OK",
-            "token"  : token
+            'result' : 'OK',
+            'token'  : token
             })
 
 
-    """
+    '''
         User Logout and un-subrscribe users topics
-    """
+    '''
 
     @async_login_required
     @gen.coroutine
@@ -71,7 +71,7 @@ class AuthHandler(BaseHandler):
         if not userid:
             self.set_status(403)
             self.write_json({
-                "result" : "fail:Authantication failed"
+                'result' : 'fail:Authantication failed'
                 })
             return
         if self.user_topic_table.has_item(userid):
@@ -80,7 +80,7 @@ class AuthHandler(BaseHandler):
             topic_and_subid_string = topic_and_subid['TopicList']
             topic_and_subid_list = topic_and_subid_string.split(';')
             if not (len(topic_and_subid_list) == 2 and topic_and_subid_list[0] == ''):
-                endpoint_info = yield self.sns_table.get_item(client_data['apns'])
+                endpoint_info = yield self.user_apns_sns_table.get_item(client_data['apns'])
                 endpoint = endpoint_info['APNsToken']
                 for topic_and_subid in topic_and_subid_list:
                     #   TODO if gets error
@@ -89,7 +89,7 @@ class AuthHandler(BaseHandler):
         # delete user memcache token
 
         del self.memcache[userid]
-        self.write_json({"result" : "OK"})            
+        self.write_json({'result' : 'OK'})            
 
 
 

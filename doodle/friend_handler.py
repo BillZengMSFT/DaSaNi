@@ -5,12 +5,13 @@ from .config import *
 from tornado import gen
 from .base_handler import *
 import re
+from .helper import *
 
 
 class FriendHandler(BaseHandler):
 
     @property 
-    def friend_table(self):
+    def user_friend_table(self):
         return self.dynamo.get_table(USER_FRIEND_TABLE)
 
     @property 
@@ -25,26 +26,26 @@ class FriendHandler(BaseHandler):
             self.test_friendship()
         elif client_data['type'] == 'create':
             friend_user_id = client_data['friend']
-            current_user = self.friend_table.get_item(self.current_userid)
-            friend_user = self.friend_table.get_item(friend_user_id)
-
+            try:
+                current_user = self.user_friend_table.get_item(self.current_userid)
+                friend_user = self.user_friend_table.get_item(friend_user_id)
+            except:
+                self.set_status(400)
+                self.write_json({
+                    "result" : "fail"
+                    })
             rel_friend = re.search(friend_user_id, current_user['FriendList'])
             if rel_friend == None:
-                if current_user['FriendList'] == ';':
-                    current_user['FriendList'] = ''
-                current_user['FriendList'] += friend_user_id+';'
+                current_user['FriendList'] = list_append_item(friend_user_id, current_user['FriendList'])
                 current_user.put()
 
             rel_friend = re.search(self.current_userid, friend_user['FriendList'])
             if rel_friend == None:
-                if friend_user['FriendList'] == ';':
-                    friend_user['FriendList'] = ''
-                friend_user['FriendList'] += self.current_userid+';'
+                friend_user['FriendList'] =list_append_item(self.current_userid, friend_user['FriendList'])
                 friend_user.put()
-        
-        self.write_json({
-            "result":"ok"
-            })
+                self.write_json({
+                    "result":"ok"
+                })
 
 
     @async_login_required
@@ -52,29 +53,29 @@ class FriendHandler(BaseHandler):
     def delete(self):
         client_data = self.data
         friend_user_id = client_data['friend']
-        current_user = self.friend_table.get_item(self.current_userid)
-        friend_user = self.friend_table.get_item(friend_user_id)
-
+        try:
+            current_user = self.user_friend_table.get_item(self.current_userid)
+            friend_user = self.user_friend_table.get_item(friend_user_id)
+        except:
+            self.set_status(400)
+            self.write_json({
+                "result" : "fail"
+                })
         rel_friend = re.search(friend_user_id, current_user['FriendList'])
         if rel_friend != None:
             friends = current_user['FriendList'].split(friend_user_id+';')
-            new_friend_list = ''
-            for f in friends:
-                new_friend_list += f
-            if new_friend_list == '':
-                new_friend_list = ';'
-            current_user['FriendList'] = new_friend_list
+            current_user['FriendList'] = list_remove_item(
+                friend_user_id + '.*?;',
+                current_user['FriendList']
+                )
             current_user.put()
 
         rel_friend = re.search(self.current_userid, friend_user['FriendList'])
         if rel_friend != None:
-            friends = friend_user['FriendList'].split(self.current_userid+';')
-            new_friend_list = ''
-            for f in friends:
-                new_friend_list += f
-            if new_friend_list == '':
-                new_friend_list = ';'
-            friend_user['FriendList'] = new_friend_list
+            friend_user['FriendList'] = list_remove_item(
+                self.current_userid + '.*?;',
+                friend_user['FriendList']
+                )
             friend_user.put()
             self.write_json({
                 "result":"ok"
@@ -87,7 +88,13 @@ class FriendHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         response = []
-        current_user = self.friend_table.get_item(self.current_userid)
+        try:
+            current_user = self.user_friend_table.get_item(self.current_userid)
+        except:
+            self.set_status(400)
+            self.write_json({
+                "result" : "fail"
+                })
         friend_list = current_user['FriendList'].split(';')
         for uid in friend_list:
             if uid != "":
@@ -103,9 +110,14 @@ class FriendHandler(BaseHandler):
     def test_friendship(self):
         client_data = self.data
         friend_user_id = client_data['friend']
-        current_user = self.friend_table.get_item(self.current_userid)
+        try:
+            current_user = self.user_friend_table.get_item(self.current_userid)
+        except:
+            self.set_status(400)
+            self.write_json({
+                "result" : "fail"
+                })
         rel_friend = re.search(friend_user_id, current_user['FriendList'])
-        print(rel_friend)
         if rel_friend == None:
             self.write_json({'result' : 'fail'})
         else:

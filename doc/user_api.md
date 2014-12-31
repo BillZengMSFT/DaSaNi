@@ -37,12 +37,8 @@ Model Fields:
 
         {
             "email"     : "address must end with .edu",
-            "password"  : "a serious pwd",
-            "major"     : "a serious major",
-            "college"   : "a school name",
             "firstname" : "first name",
             "lastname"  : "last name",
-            "gender"    : "a serious bool, true for man"
         }
 
 ```
