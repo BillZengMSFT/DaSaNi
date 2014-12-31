@@ -5,12 +5,13 @@ import time
 from .config import *
 from tornado import gen
 from .base_handler import *
+from helper import *
 from boto.dynamodb.condition.Condition import *
 
 class InboxHandler(BaseHandler):
 
     @property 
-    def table(self):
+    def user_inbox_table(self):
         return self.dynamo.get_table(USER_INBOX_TABLE)
 
     @async_login_required
@@ -19,13 +20,16 @@ class InboxHandler(BaseHandler):
         client_data = self.data
         target_user_id = client_data['target']
         payload = client_data['payload']
+        timestamp = str(time.time()).split('.')[0]
+        hash_key = md5(payload+timestamp)
         attrs = {
+            'MessageID'     : hash_key,
             'UserID'        : target_user_id,
             'JsonMessage'   : payload,
-            'Timestamp'     : str(time.time()).split('.')[0]
+            'Timestamp'     : timestamp
         }
         item = self.table.new_item(
-            hash_key=UserID,
+            hash_key=hash_key,
             attrs=attrs
         )
         item.put()
@@ -35,12 +39,11 @@ class InboxHandler(BaseHandler):
     def get(self):
         response = []
         current_user_id = self.current_user
-        inbox_entries = self.table.query(
-            current_user_id,
-            range_key_condition=LE,
-        )
-        for entry in inbox_entries:
-            response.append(entry)
+        messages = self.user_inbox_table.scan({
+            'UserID'    :   EQ(current_user_id)
+        })
+        for message in messages:
+            response.append(message)
         self.write_json({'result' : response})
 
 

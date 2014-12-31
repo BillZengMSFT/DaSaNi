@@ -39,8 +39,8 @@ class ChatgroupHandler(BaseHandler):
     def post(self):
         client_data = self.data
         event_id = ''
-        if client_data.has_key('EventID'):
-            event_id = client_data['EventID']
+        if client_data.has_key('eventid'):
+            event_id = client_data['eventid']
         timestamp = str(time.time()).split('.')[0]
         chatgroup_id = md5(self.current_user+timestamp)
         sqs_response = self.sqs.create_queue(
@@ -70,6 +70,10 @@ class ChatgroupHandler(BaseHandler):
         members = memberlist.split(';')
         for member in members:
             self.__add_user_to_topic(member)
+        self.write_json({
+            'chatgroup_id' : chatgroup_id,
+            'sqs' : sqs_arn    
+        })
 
     """
         accept application / accept invitation / leave  
@@ -220,7 +224,7 @@ class ChatgroupHandler(BaseHandler):
         client_data = self.data
         chatgroup_id = client_data['chatgroup_id']
         chatgroup = self.chatgroup_table.get_item(chatgroup_id)
-        if chatgroup['CreatorID'] != self.current_userid:
+        if chatgroup['creator_id'] != self.current_userid:
             self.set_status(400)
             self.write_json({'result' : 'unauthorized to remove chatgroup'})
         sns_arn = chatgroup['SNS']
