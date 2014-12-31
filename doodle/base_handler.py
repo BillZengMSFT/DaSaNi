@@ -6,9 +6,8 @@ from tornado import gen
 from dynamo import User
 from functools import wraps
 import hashlib
-from werkzeug.security import generate_password_hash
 from tornado.escape import json_encode
-
+from .helper import *
 class BaseHandler(tornado.web.RequestHandler):
 
     @property
@@ -72,7 +71,7 @@ class BaseHandler(tornado.web.RequestHandler):
             # Check in Dynamo
             user = yield User.verify_pwd(
                 email_or_token, 
-                generate_password_hash(pwd_or_userid),
+                hash_password(pwd_or_userid),
                 self.dynamo)
 
         
@@ -96,6 +95,7 @@ class BaseHandler(tornado.web.RequestHandler):
     def write_json(self, data):
         self.set_header("Content-Type", "application/json")
         self.write(json_encode(data))
+        self.finish()
 
 
 """ Apply for asynchronous call
@@ -108,9 +108,12 @@ def async_login_required(fun):
     def __decorator(self, *args, **kw):
         user = yield self.authorize_user()
         if not user:
-            self.send_error(403)
+            self.set_status(403)
+            self.write_json({
+                "result" : "fail : Authantication failed"
+                })
             return
-        self.current_user = user
+        self.current_userid = user
         yield fun(self, *args, **kw)
 
     return __decorator
@@ -125,10 +128,13 @@ def login_required(fun):
     def __decorator(self, *args, **kw):
         user = yield self.authorize_user()
         if not user:
-            self.send_error(403)
+            self.set_status(403)
+            self.write_json({
+                "result" : "fail : Authantication failed"
+                })
             return
 
-        self.current_user = user
+        self.current_userid = user
         fun(self, *args, **kw)
 
     return __decorator

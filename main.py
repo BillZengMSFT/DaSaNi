@@ -58,12 +58,40 @@ def get_url_list():
         tornado.web.URLSpec(r"/api/v1/auth/logout",AuthHandler),
     ]
 
-    return (
-        client_handler_url_set + 
-        user_handler_url_set +
-        activate_handler_url_set +
-        auth_handler_url_set
-    )
+    friend_handler_url_set = [
+        # add a new friend
+        tornado.web.URLSpec(r"/api/v1/friend/create",FriendHandler),
+        # test if someone is a friend
+        tornado.web.URLSpec(r"/api/v1/friend/test_friend",FriendHandler),
+        # delete a friend
+        tornado.web.URLSpec(r"/api/v1/friend/delete",FriendHandler),
+        # get a list of current user's friends
+        tornado.web.URLSpec(r"/api/v1/friend/get",FriendHandler),
+    ]
+
+    inbox_handler_url_set = [
+        # create a new inbox
+        tornado.web.URLSpec(r"/api/v1/inbox/create",InboxHandler),
+        # get a list of current user's message
+        tornado.web.URLSpec(r"/api/v1/inbox/get",InboxHandler),
+    ]
+
+    url_list = [
+        client_handler_url_set,
+        user_handler_url_set,
+        activate_handler_url_set,
+        auth_handler_url_set,
+        friend_handler_url_set,
+        inbox_handler_url_set,
+    ]
+
+    url_full_list = []
+
+    for url_set in url_list:
+        for url in url_set:
+            url_full_list.append(url)
+
+    return url_full_list
 
 
 def get_settings():
