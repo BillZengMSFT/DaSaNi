@@ -14,8 +14,6 @@
 """
 
 import json
-import time
-import random
 from config import *
 
 
@@ -67,7 +65,6 @@ def start_eating():
     while(1):
         for queue in queues:
             noosa(queue)
-        time.sleep(random.randint(0, 10))
 
 if __name__ == '__main__':
     print('A ' + noosa_name() + ' noosa starts eating.')
