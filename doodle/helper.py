@@ -3,6 +3,8 @@
 import hashlib
 import time
 from .config import ACTIVATOR_EMAILADDRESS
+from werkzeug.security import generate_password_hash
+
 
 def send_email(ses, email, fn, ln):
     code = md5(email+str(time.time()).split(".")[0])
@@ -20,3 +22,7 @@ def md5(s):
     m = hashlib.md5()
     m.update(s.encode("utf-8"))
     return m.hexdigest()
+
+
+def hash_password(pwd):
+    return generate_password_hash(pwd).split(":")[0]

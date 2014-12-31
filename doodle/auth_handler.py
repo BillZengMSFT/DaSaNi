@@ -9,12 +9,12 @@ from dynamo import User
 class AuthHandler(BaseHandler):
 
     @property 
-    def table(self):
+    def user_topic_table(self):
         return self.dynamo.get_table(USER_TOPIC_TABLE)
 
     @property 
     def sns_table(self):
-        self.dynamo.get_table(USER_APNS_SNS_TABLE)
+        return self.dynamo.get_table(USER_APNS_SNS_TABLE)
 
     """
         User Login and re-subscribe users topics
@@ -31,22 +31,25 @@ class AuthHandler(BaseHandler):
         # verify user logged in
         
         if not userid:
-            self.send_error(403)
+            self.set_status(403)
+            self.write_json({
+                "result" : "Authantication failed"
+                })
             return
 
         # split and subscribe user's topics
-        if self.table.has_item(userid):
-            user_data = self.table.get_item(userid)
+        if self.user_topic_table.has_item(userid):
+            topic_and_subid = self.user_topic_table.get_item(userid)
             topic_and_subid_string = topic_and_subid['TopicList']
             topic_and_subid_list = topic_and_subid_string.split(';')
             topic_and_subid_list = topic_and_subid_string.split(';')
-            if not (len(topic_list) == 1 and topic_list[0] == ''):
-                endpoint_info = yield self.sns_table.get_item(client_data['apns'])
+            if not (len(topic_and_subid_list) == 2 and topic_and_subid_list[0] == ''):
+                endpoint_info = yield gen.maybe_future(self.sns_table.get_item(client_data['apns']))
                 endpoint = endpoint_info['APNsToken']
                 for topic_and_subid in topic_and_subid_list:
                     #   TODO if gets error
                     topic_arn = topic_and_subid.split('|')[0]
-                    yield self.sns.subscribe(topic_arn, "application", endpoint)
+                    yield gen.maybe_future(self.sns.subscribe(topic_arn, "application", endpoint))
         # set user memcache token
 
         token = User.create_token(userid, self.memcache)
@@ -63,17 +66,20 @@ class AuthHandler(BaseHandler):
     @async_login_required
     @gen.coroutine
     def delete(self):
-        userid = self.current_user
+        userid = self.current_userid
 
         if not userid:
-            self.send_error(403)
+            self.set_status(403)
+            self.write_json({
+                "result" : "fail:Authantication failed"
+                })
             return
-        if self.table.has_item(userid):
+        if self.user_topic_table.has_item(userid):
             # split and unsubscribe user's topics
-            user_data = self.table.get_item(userid)
+            topic_and_subid = self.user_topic_table.get_item(userid)
             topic_and_subid_string = topic_and_subid['TopicList']
             topic_and_subid_list = topic_and_subid_string.split(';')
-            if not (len(topic_list) == 1 and topic_list[0] == ''):
+            if not (len(topic_and_subid_list) == 2 and topic_and_subid_list[0] == ''):
                 endpoint_info = yield self.sns_table.get_item(client_data['apns'])
                 endpoint = endpoint_info['APNsToken']
                 for topic_and_subid in topic_and_subid_list:

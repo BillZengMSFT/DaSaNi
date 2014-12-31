@@ -10,12 +10,12 @@ from .helper import *
 
 class ActivateHandler(BaseHandler):
     @property
-    def table(self):
+    def user_table(self):
         return self.dynamo.get_table(USER_TABLE)
 
     @property
     def activate_table(self):
-        return self.dynamo.get_table(ACTIVATE_TABLE)
+        return self.dynamo.get_table(USER_ACTIVATE_TABLE)
 
     @gen.coroutine
     def post(self):
@@ -34,15 +34,18 @@ class ActivateHandler(BaseHandler):
         if code_is_real:
             activator = yield gen.maybe_future(self.activate_table.get_item(userid))
             if activator["Code"] == code:
-                user_data = self.table.get_item(userid)
+                user_data = self.user_table.get_item(userid)
                 user_data["AccountActive"] = True
                 yield gen.maybe_future(user_data.put())
                 yield gen.maybe_future(activator.delete())
                 self.write_json({
-                    "result":"success"
+                    "result":"ok"
                     })
             else:
-                self.send_error(403)
+                self.set_status(403)
+                self.write_json({
+                    "result" : "fail : Authantication failed"
+                })
                 return
 
 
@@ -57,7 +60,7 @@ class ActivateHandler(BaseHandler):
             }
         """
         userid = self.data["userid"]
-        user_data = yield gen.maybe_future(self.table.get_item(userid))
+        user_data = yield gen.maybe_future(self.user_table.get_item(userid))
         activator = self.activate_table.get_item(userid)
         
         activator["Attempt"] = activator["Attempt"] + 1
@@ -93,7 +96,7 @@ class ActivateHandler(BaseHandler):
         """
             Retrieve if an account is activated or not
         """
-        user_data = yield gen.maybe_future(self.table.get_item(userid))
+        user_data = yield gen.maybe_future(self.user_table.get_item(userid))
         if user_data["AccountActive"] == True:
             self.write_json({
                 'result':"ok"

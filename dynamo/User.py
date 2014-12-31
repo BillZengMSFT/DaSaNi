@@ -7,7 +7,6 @@ import hashlib
 import time
 from doodle import config
 from doodle import helper
-from werkzeug.security import generate_password_hash
 # User Model
 
 """
@@ -42,7 +41,7 @@ def verify_pwd(email, pwd, dynamo):
         user_data = user_table.get_item(helper.md5(email))
     else:
         return None
-    if user_data["Password"][:len(pwd)-1] == generate_password_hash(pwd)[:len(pwd)-1]:
+    if user_data["Password"] == helper.hash_password(pwd):
         return user_data['UserID']
     else:
         return None

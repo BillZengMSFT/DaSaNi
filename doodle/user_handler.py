@@ -9,19 +9,30 @@ from .base_handler import *
 import time
 import re
 from .config import *
-from werkzeug.security import generate_password_hash
 import hashlib
 from .helper import *
 
 class UserHandler(BaseHandler):
 
     @property
-    def table(self):
+    def user_table(self):
         return self.dynamo.get_table(USER_TABLE)
 
     @property
     def activate_table(self):
-        return self.dynamo.get_table(ACTIVATE_TABLE)
+        return self.dynamo.get_table(USER_ACTIVATE_TABLE)
+
+    @property
+    def topic_table(self):
+        return self.dynamo.get_table(USER_TOPIC_TABLE)
+
+    @property
+    def friend_table(self):
+        return self.dynamo.get_table(USER_FRIEND_TABLE)
+
+    @property
+    def user_event_table(self):
+        return self.dynamo.get_table(USER_EVENT_TABLE)
 
     @gen.coroutine
     def post(self):
@@ -36,7 +47,7 @@ class UserHandler(BaseHandler):
         # Check if this email has been registered
         
         
-        user_exist = yield gen.maybe_future(self.table.has_item(hashed_userid))
+        user_exist = yield gen.maybe_future(self.user_table.has_item(hashed_userid))
 
         if user_exist == True:
 
@@ -48,7 +59,7 @@ class UserHandler(BaseHandler):
             return
 
 
-        hashed_password = generate_password_hash(password)
+        hashed_password = hash_password(password)
         
         # Build attrs for the new user
 
@@ -57,14 +68,13 @@ class UserHandler(BaseHandler):
             "Email"         : self.data["email"],
             "Major"         : self.data["major"],
             "School"        : self.data["college"],
-            "Firstname"     : self.data['firstname'],
-            "Lastname"      : self.data['lastname'],
+            "FirstName"     : self.data['firstname'],
+            "LastName"      : self.data['lastname'],
             "Gender"        : self.data['gender'],
             "AccountActive" : False,
-            "TopicList"     : ";",
         }
         # Create new user item and upload it to database
-        new_user = self.table.new_item(
+        new_user = self.user_table.new_item(
             hash_key=hashed_userid,
             range_key=None,
             attrs=attrs
@@ -95,9 +105,30 @@ class UserHandler(BaseHandler):
             attrs=activator_attrs
             )
 
+        new_user_topic_list= self.topic_table.new_item(
+            hash_key=hashed_userid,
+            range_key=None,
+            attrs={"TopicList" : ";"}
+            )
+
+        new_user_friend_list= self.friend_table.new_item(
+            hash_key=hashed_userid,
+            range_key=None,
+            attrs={"FriendList" : ";"}
+            )
+
+        new_user_event_list = self.user_event_table.new_item(
+            hash_key=hashed_userid,
+            range_key=None,
+            attrs={"EventList" : ";"}
+            )
+
         # Upload new user information and activator to AWS
         yield gen.maybe_future(new_user.put())
         yield gen.maybe_future(new_user_activator.put())
+        yield gen.maybe_future(new_user_topic_list.put())
+        yield gen.maybe_future(new_user_friend_list.put())
+        yield gen.maybe_future(new_user_event_list.put())
         # Only send userid back to the client
 
         self.write_json({
@@ -110,7 +141,7 @@ class UserHandler(BaseHandler):
     @gen.coroutine
     def put(self):
         self.input_firewall(self.data)
-        user_data = self.table.get_item(self.current_user)
+        user_data = self.user_table.get_item(self.current_userid)
         # TODO
         # Check if there is any invalid field in the data
 
@@ -123,8 +154,8 @@ class UserHandler(BaseHandler):
     @async_login_required
     @gen.coroutine
     def get(self):
-        userid = self.current_user
-        user_data = self.table.get_item(userid)
+        userid = self.current_userid
+        user_data = self.user_table.get_item(userid)
         # filter output information
         user_data = self.output_firewall(user_data)
         self.write_json({
@@ -157,16 +188,16 @@ class UserHandler(BaseHandler):
             
             if key == "email" and len(val)>50:
                 self.set_status(400)
-                self.write_json({ "result":"Invalid Field: "+key})
+                self.write_json({ "result":"fail : Invalid Field: "+key})
             if key not in outside_field_names or (key != "email" and key != "gender" and len(val)> 20):
                 self.set_status(400)
-                self.write_json({ "result":"Invalid Field: "+key})
+                self.write_json({ "result":"fail : Invalid Field: "+key})
             if key == 'phone' and not re.match('\d{3}-\d{3}-\d{4}', val):
                 self.set_status(400)
-                self.write_json({ "result":"Invalid Field: "+key})
+                self.write_json({ "result":"fail : Invalid Field: "+key})
             if key == 'email' and not re.match(r'[a-zA-Z0-9]+@[a-z]+\.edu', val):
                 self.set_status(400)
-                self.write_json({ "result":"Invalid Field: "+key})
+                self.write_json({ "result":"fail : Invalid Field: "+key})
 
 
 

@@ -8,7 +8,7 @@ from .base_handler import *
 class ClientHandler(BaseHandler):
 
     @property
-    def table(self):
+    def sns_table(self):
         return self.dynamo.get_table(USER_APNS_SNS_TABLE)
 
 
@@ -30,13 +30,13 @@ class ClientHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         aws_endpoint_arn = self.add_sns_app_endpoint()
-        userid = self.current_user
+        userid = self.current_userid
         attrs = {
             'UserID' : userid, 
             'APNsToken' : self.data['deviceToken'], 
             'SNSToken' : aws_endpoint_arn
             }
-        item = self.table.new_item(attrs=attrs)
+        item = self.sns_table.new_item(attrs=attrs)
         item.put()
 
 
