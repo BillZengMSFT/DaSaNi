@@ -240,6 +240,15 @@ class ChatgroupHandler(BaseHandler):
         chatgroup['SQS'] = ';'
         chatgroup['SNS'] = ';'
         chatgroup.put()
+        
+        # delete member topic
+        member_list = chatgroup['MemberList']
+        members = member_list.split(';')
+        for member in member_list:
+            user_topic = self.user_topic_table.get_item(member)
+            user_topic['TopicList'] = list_delete_item(member+'.*?;', user_topic['TopicList'])
+            user_topic.put()
+
         self.write_json({'result' : 'OK'})
 
 
