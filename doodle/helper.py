@@ -2,6 +2,7 @@
 
 import hashlib
 import time
+import re
 from .config import ACTIVATOR_EMAILADDRESS
 from werkzeug.security import generate_password_hash
 
@@ -28,9 +29,30 @@ def hash_password(pwd):
     return generate_password_hash(pwd).split(":")[0]
 
 
-def list_delete_item(list_string, to_remove_string):
-    
+# regex
+def list_delete_item(to_remove_reg, list_string):
+    # handle empty string
+    if list_string == '' or list_string == ';':
+        return ';'
+    # handle not found 
+    match = re.search(to_remove_string, list_string)
+    if match == None:
+        return list_string
+    front, rear = list_string.split(match.group())
+    return front+rear
+
+# raw string
+def list_append_item(to_append_string, list_string):
+    # handle empty string
+    if list_string == '' or list_string == ';':
+        list_string = ''
+    list_string += to_append_string
+    return list_string
 
 
-def list_append_item(list_string, to_append_string):
-    pass
+
+
+
+
+
+
