@@ -76,6 +76,17 @@ def get_url_list():
         tornado.web.URLSpec(r"/api/v1/inbox/get",InboxHandler),
     ]
 
+    chatgroup_handler_url_set = [
+        # create a new chatgroup
+        tornado.web.URLSpec(r"/api/v1/chatgroup/create",ChatgroupHandler),
+        # accept or reject application or invitation / leave
+        tornado.web.URLSpec(r"/api/v1/chatgroup/put",ChatgroupHandler),
+        # get information about a chatgroup
+        tornado.web.URLSpec(r"/api/v1/chatgroup/get/(.*)",ChatgroupHandler),
+        # delete a chatgroup
+        tornado.web.URLSpec(r"/api/v1/chatgroup/delete",ChatgroupHandler),
+    ]
+
     url_list = [
         client_handler_url_set,
         user_handler_url_set,
@@ -83,6 +94,7 @@ def get_url_list():
         auth_handler_url_set,
         friend_handler_url_set,
         inbox_handler_url_set,
+        chatgroup_handler_url_set,
     ]
 
     url_full_list = []

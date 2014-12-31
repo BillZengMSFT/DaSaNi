@@ -13,7 +13,7 @@ PAYLOAD:
         'name'          : 'a chatgroup name',
         'memberlist'    : 'userid_0;userid_1;...',
         'capacity'      : 'a number of capacity',
-
+        'photo'         : 'a photo url'
     }
 
 RETURN:

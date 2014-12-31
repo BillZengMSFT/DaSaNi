@@ -19,20 +19,8 @@ class UserHandler(BaseHandler):
         return self.dynamo.get_table(USER_TABLE)
 
     @property
-    def activate_table(self):
+    def user_activate_table(self):
         return self.dynamo.get_table(USER_ACTIVATE_TABLE)
-
-    @property
-    def topic_table(self):
-        return self.dynamo.get_table(USER_TOPIC_TABLE)
-
-    @property
-    def friend_table(self):
-        return self.dynamo.get_table(USER_FRIEND_TABLE)
-
-    @property
-    def user_event_table(self):
-        return self.dynamo.get_table(USER_EVENT_TABLE)
 
     @gen.coroutine
     def post(self):
@@ -64,13 +52,9 @@ class UserHandler(BaseHandler):
         # Build attrs for the new user
 
         attrs = {
-            "Password"      : hashed_password,
             "Email"         : self.data["email"],
-            "Major"         : self.data["major"],
-            "School"        : self.data["college"],
             "FirstName"     : self.data['firstname'],
             "LastName"      : self.data['lastname'],
-            "Gender"        : self.data['gender'],
             "AccountActive" : False,
         }
         # Create new user item and upload it to database
@@ -94,41 +78,20 @@ class UserHandler(BaseHandler):
             return
 
         activator_attrs = {
-            "Time"      : str(time.time()).split(".")[0],
+            "Timestamp"      : str(time.time()).split(".")[0],
             "Code"      : activate_code,
             "Attempt"   : 1
         }
         
-        new_user_activator = self.activate_table.new_item(
+        new_user_activator = self.user_activate_table.new_item(
             hash_key=hashed_userid,
             range_key=None,
             attrs=activator_attrs
             )
 
-        new_user_topic_list= self.topic_table.new_item(
-            hash_key=hashed_userid,
-            range_key=None,
-            attrs={"TopicList" : ";"}
-            )
-
-        new_user_friend_list= self.friend_table.new_item(
-            hash_key=hashed_userid,
-            range_key=None,
-            attrs={"FriendList" : ";"}
-            )
-
-        new_user_event_list = self.user_event_table.new_item(
-            hash_key=hashed_userid,
-            range_key=None,
-            attrs={"EventList" : ";"}
-            )
-
         # Upload new user information and activator to AWS
         yield gen.maybe_future(new_user.put())
         yield gen.maybe_future(new_user_activator.put())
-        yield gen.maybe_future(new_user_topic_list.put())
-        yield gen.maybe_future(new_user_friend_list.put())
-        yield gen.maybe_future(new_user_event_list.put())
         # Only send userid back to the client
 
         self.write_json({
@@ -142,9 +105,6 @@ class UserHandler(BaseHandler):
     def put(self):
         self.input_firewall(self.data)
         user_data = self.user_table.get_item(self.current_userid)
-        # TODO
-        # Check if there is any invalid field in the data
-
         user_data.update(self.data)
         current_user.data.put()
         self.write_json({'result': 'OK'})

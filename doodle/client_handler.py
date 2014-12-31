@@ -8,7 +8,7 @@ from .base_handler import *
 class ClientHandler(BaseHandler):
 
     @property
-    def sns_table(self):
+    def user_apns_sns_table(self):
         return self.dynamo.get_table(USER_APNS_SNS_TABLE)
 
 
@@ -36,7 +36,7 @@ class ClientHandler(BaseHandler):
             'APNsToken' : self.data['deviceToken'], 
             'SNSToken' : aws_endpoint_arn
             }
-        item = self.table.new_item(
+        item = self.user_apns_sns_table.new_item(
             hash_key=userid,
             attrs=attrs
         )
