@@ -14,11 +14,14 @@
 """
 
 import json
-from .config import *
+import time
+import random
+from config import *
+
 
 sqs = get_sqs()
 sns = get_sns()
-dynamo = get_sns()
+dynamo = get_dynamo()
 chat_record_table = dynamo.get_table(CHAT_RECORD_TABLE)
 
 
@@ -64,10 +67,11 @@ def start_eating():
     while(1):
         for queue in queues:
             noosa(queue)
+        time.sleep(random.randint(0, 10))
 
 if __name__ == '__main__':
-    start_eating()
     print('A ' + noosa_name() + ' noosa starts eating.')
+    start_eating()
 
 else:
     print('Fatal Error: Noosa is a cup of yoghurt.')

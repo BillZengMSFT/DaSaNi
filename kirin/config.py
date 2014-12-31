@@ -1,4 +1,6 @@
-import boto
+import boto.sqs
+import boto.sns
+import boto.dynamodb
 import random
 
 AWS_REGION = 'us-west-2'
@@ -34,28 +36,28 @@ noosa_names = [
 
 # noosa name
 def noosa_name():
-    i = random.randint(0, len(noosa_names))
+    i = random.randint(0, len(noosa_names) - 1)
     return noosa_names[i]
 
 def get_sqs():
     conn = boto.sqs.connect_to_region(
-        config.AWS_REGION,
-        aws_access_key_id=config.AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=config.AWS_ACCESS_KEY)
+        AWS_REGION,
+        aws_access_key_id=AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_ACCESS_KEY)
     return conn
 
 def get_sns():
     conn = boto.sns.connect_to_region(
-        config.AWS_REGION,
-        aws_access_key_id=config.AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=config.AWS_ACCESS_KEY)
+        AWS_REGION,
+        aws_access_key_id=AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_ACCESS_KEY)
     return conn
 
 def get_dynamo():
     conn = boto.dynamodb.connect_to_region(
-        config.AWS_REGION,
-        aws_access_key_id=config.AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=config.AWS_ACCESS_KEY)
+        AWS_REGION,
+        aws_access_key_id=AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_ACCESS_KEY)
     return conn
 
 
