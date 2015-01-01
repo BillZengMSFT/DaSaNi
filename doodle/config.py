@@ -17,8 +17,11 @@ USER_ACTIVATE_TABLE = 'User_Activate_Table'
 USER_FRIEND_TABLE = 'User_Friend_Table'
 USER_INBOX_TABLE = 'User_Inbox_Table'
 CHATGROUP_TABLE = 'Chatgroup_Table'
+EVENT_TABLE = 'Event_Table'
 USER_EVENT_TABLE = 'User_Event_Table'
 
 COOKIE_SECRET = '_&xC#!~-2987UYWq|{RClubCIL}o><?[]axWERFC@'
 
 ACTIVATOR_EMAILADDRESS = "billzeng808@gmail.com"
+
+ADMIN_USERID = '000'

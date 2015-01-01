@@ -76,12 +76,13 @@ class ActivateHandler(BaseHandler):
 
 
                 self.write_json({
-                    'result':'ok'
+                    'result' : 'ok'
                     })
             else:
                 self.set_status(403)
                 self.write_json({
-                    'result' : 'fail : Authantication failed'
+                    'result' : 'fail',
+                    'reason' : 'Authantication failed'
                 })
                 return
 
@@ -99,16 +100,18 @@ class ActivateHandler(BaseHandler):
         userid = self.data['userid']
         try:
             user_data = yield gen.maybe_future(self.user_table.get_item(userid))
-            activator = self.user_activate_table.get_item(userid)
+            activator = yield gen.maybe_future(self.user_activate_table.get_item(userid))
         except:
             self.set_status(400)
             self.write_json({
-                'result' : 'fail'
+                'result' : 'fail',
+                'reason' : 'invaild userid'
                 })
         activator['Attempt'] = activator['Attempt'] + 1
         if activator['Attempt'] > 3:
             self.write_json({
-                'result':'fail: Too many attempts recorded'
+                'result' : 'fail',
+                'reason' : 'too many attempts recorded'
             })
             return
         try:
@@ -119,7 +122,8 @@ class ActivateHandler(BaseHandler):
                 user_data['Lastname'])
         except:
             self.write_json({
-                'result':'fail: Email not sent'
+                'result' : 'fail',
+                'reason' : 'failed to send email'
             })
             return
         # update dynamo
@@ -143,16 +147,17 @@ class ActivateHandler(BaseHandler):
         except:
             self.set_status(400)
             self.write_json({
-                'result' : 'fail'
+                'result' : 'fail',
+                'reason' : 'invalid userid'
                 })
         if user_data['AccountActive'] == True:
             self.write_json({
-                'result':'ok'
+                'result' : 'ok'
             })
         else:
-            self.set_status(403)
             self.write_json({
-                'result':'fail'
+                'result' : 'fail',
+                'reason' : 'account not activated'
             })
 
 

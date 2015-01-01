@@ -32,7 +32,8 @@ class FriendHandler(BaseHandler):
             except:
                 self.set_status(400)
                 self.write_json({
-                    "result" : "fail"
+                    'result' : 'fail',
+                    'reason' : 'invalid userid or friend id'
                     })
             rel_friend = re.search(friend_user_id, current_user['FriendList'])
             if rel_friend == None:
@@ -44,7 +45,7 @@ class FriendHandler(BaseHandler):
                 friend_user['FriendList'] =list_append_item(self.current_userid, friend_user['FriendList'])
                 friend_user.put()
                 self.write_json({
-                    "result":"ok"
+                    'result':'ok'
                 })
 
 
@@ -59,7 +60,8 @@ class FriendHandler(BaseHandler):
         except:
             self.set_status(400)
             self.write_json({
-                "result" : "fail"
+                'result' : 'fail',
+                'reason' : 'invalid userid or friend id'
                 })
         rel_friend = re.search(friend_user_id, current_user['FriendList'])
         if rel_friend != None:
@@ -78,7 +80,7 @@ class FriendHandler(BaseHandler):
                 )
             friend_user.put()
             self.write_json({
-                "result":"ok"
+                'result':'ok'
             })
         
         
@@ -93,11 +95,12 @@ class FriendHandler(BaseHandler):
         except:
             self.set_status(400)
             self.write_json({
-                "result" : "fail"
+                'result' : 'fail',
+                'reason' : 'invalid userid'
                 })
         friend_list = current_user['FriendList'].split(';')
         for uid in friend_list:
-            if uid != "":
+            if uid != '':
                 user = self.user_table.get_item(uid)
                 cleaned_user = user_object_filter(user)
                 response.append(cleaned_user)
@@ -115,11 +118,15 @@ class FriendHandler(BaseHandler):
         except:
             self.set_status(400)
             self.write_json({
-                "result" : "fail"
+                'result' : 'fail',
+                'reason' : 'invalid userid'
                 })
         rel_friend = re.search(friend_user_id, current_user['FriendList'])
         if rel_friend == None:
-            self.write_json({'result' : 'fail'})
+            self.write_json({
+                'result' : 'fail',
+                'reason' : 'invalid friendid'
+                })
         else:
             self.write_json({'result' : 'ok'})
 

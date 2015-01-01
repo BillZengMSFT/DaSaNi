@@ -33,9 +33,16 @@ class AuthHandler(BaseHandler):
         if not userid:
             self.set_status(403)
             self.write_json({
-                'result' : 'Authantication failed'
+                'result' : 'fail',
+                'reason' : 'authantication failed'
                 })
             return
+
+        # log out other devices
+
+        self.user_logout(userid)
+
+        # check if the user is activated
 
         # split and subscribe user's topics
         if self.user_topic_table.has_item(userid):
@@ -66,12 +73,19 @@ class AuthHandler(BaseHandler):
     @async_login_required
     @gen.coroutine
     def delete(self):
-        userid = self.current_userid
+        self.user_logout(self.current_userid)
+        self.write_json({'result' : 'OK'})            
+
+
+
+
+    def user_logout(self, userid):
 
         if not userid:
             self.set_status(403)
             self.write_json({
-                'result' : 'fail:Authantication failed'
+                'result' : 'fail',
+                'reason' : 'authantication failed'
                 })
             return
         if self.user_topic_table.has_item(userid):
@@ -89,12 +103,6 @@ class AuthHandler(BaseHandler):
         # delete user memcache token
 
         del self.memcache[userid]
-        self.write_json({'result' : 'OK'})            
-
-
-
-
-
 
 
 

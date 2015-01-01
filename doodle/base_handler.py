@@ -110,7 +110,8 @@ def async_login_required(fun):
         if not user:
             self.set_status(403)
             self.write_json({
-                "result" : "fail : Authantication failed"
+                'result' : 'fail',
+                'reason' : 'Authantication failed'
                 })
             return
         self.current_userid = user
@@ -130,7 +131,8 @@ def login_required(fun):
         if not user:
             self.set_status(403)
             self.write_json({
-                "result" : "fail : Authantication failed"
+                'result' : 'fail',
+                'reason' : 'Authantication failed'
                 })
             return
 

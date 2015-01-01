@@ -40,10 +40,11 @@ class UserHandler(BaseHandler):
         if user_exist == True:
 
             # tell client and stop processing this request
+            self.set_status(400)
             self.write_json({
-                'status': 0,
-                'error': 'Email already in use'
-            })
+                'result' : 'fail',
+                'reason' : 'email already used'
+                })
             return
 
 
