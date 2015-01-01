@@ -19,6 +19,7 @@ USER_INBOX_TABLE = 'User_Inbox_Table'
 CHATGROUP_TABLE = 'Chatgroup_Table'
 EVENT_TABLE = 'Event_Table'
 USER_EVENT_TABLE = 'User_Event_Table'
+EVENT_COMMENT_TABLE = 'Event_Comment_Table'
 
 COOKIE_SECRET = '_&xC#!~-2987UYWq|{RClubCIL}o><?[]axWERFC@'
 

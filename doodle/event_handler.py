@@ -50,7 +50,6 @@ class EventHandler(BaseHandler):
             'CreatorID'     : self.current_user,
             'MemberList'    : client_data['memberlist'],
             'LikeList'      : ';',
-            'CommentList'   : ';',
             'detail'        : sns_arn,
             'location'      : sqs_arn,
             'Timestamp'     : timestamp,

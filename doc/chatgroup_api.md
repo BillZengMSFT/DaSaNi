@@ -22,12 +22,12 @@ RETURN:
         'sqs'          : 'sqs arn'
     }
 ```
-    Accept or reject application or invitation / leave
+    
+    Accept or reject application or invitation / leave a chatgroup
 
 > put* : /api/v1/chatgroup/put
 
 ```
-Accept or reject application or invitation / leave a chatgroup
 
 
 PAYLOAD:
@@ -55,7 +55,7 @@ RETURN:
 
 ```
 
-> get : /api/v1/chatgroup/get/chatgroup_id
+> get* : /api/v1/chatgroup/get/chatgroup_id
 
 ```
     Return specific chatgroup info
@@ -72,7 +72,7 @@ RETURN:
     }
 ```
 
-> delete : /api/v1/chatgroup/delete
+> delete* : /api/v1/chatgroup/delete
 
 ```
 PAYLOAD:

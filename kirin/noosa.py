@@ -5,10 +5,10 @@
         "from"      : "a user id who shoot message",
         "timestamp" : "a timestamp",
         "topic_arn" : "a topic_arn",
-        "content"   : {
+        "content"   : "{
             "type"  : "text / photo / voice",
             "message" : "text or a link"
-        }
+        }"
     }
 
 """
