@@ -38,15 +38,18 @@ class ChatgroupHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         client_data = self.data
-        event_id = ''
-        if 'eventid' in client_data:
-            event_id = client_data['eventid']
+
+        event_id = option_value(client_data, 'eventid')
+
         timestamp = str(time.time()).split('.')[0]
+
         chatgroup_id = md5(self.current_userid+timestamp)
+
         sqs_response = self.sqs.create_queue(
             chatgroup_id
         )
         sqs_arn = sqs_response._arn()
+
         sns_response = self.sns.create_topic(
             chatgroup_id
         )
@@ -68,12 +71,13 @@ class ChatgroupHandler(BaseHandler):
             hash_key=chatgroup_id,
             range_key=None,
             attrs=attrs
-            )
+        )
         item.put()
 
         members = memberlist.split(';')
         for member in members:
             self.__add_user_to_topic(member)
+
         self.write_json({
             'chatgroup_id' : chatgroup_id,
             'sqs' : sqs_arn    
@@ -88,10 +92,12 @@ class ChatgroupHandler(BaseHandler):
     def put(self):
         client_data = self.data
         request_type = client_data['type']
-        choice = client_data['choice']
         chatgroup_id = client_data['chatgroup_id']
-        inbox_id = client_data['inbox_message_id']
-        attrs = client_data['attrs']
+
+        choice = option_value(client_data, 'choice')
+        inbox_id = option_value(client_data, 'inbox_message_id')
+        attrs = option_value(client_data, 'attrs')
+
         if request_type == 'application':
             self.__chatgroup_application(client_data['who_apply'], chatgroup_id, self.current_userid, choice, inbox_message_id)
         elif request_type == 'invitation':
@@ -99,7 +105,7 @@ class ChatgroupHandler(BaseHandler):
         elif request_type == 'leave':
             self.__chatgroup_leave(client_data['who_leave'], chatgroup_id)
         elif request_type == 'update':
-            self.__chatgroup_update(chatgroup_id,client_data['attrs'])
+            self.__chatgroup_update(chatgroup_id, client_data['attrs'])
 
     """
         Create or update user's joined topic list
@@ -107,8 +113,11 @@ class ChatgroupHandler(BaseHandler):
 
     def __add_user_to_topic(self, sns_topic, subscription_arn):
         if self.user_topic_table.has_item(member):
-            user_topic = self.user_topic.get_item(member)
-            user_topic['TopicList'] = list_append_item(sns_topic+'|'+subscription_arn,user_topic['TopicList'])
+            user_topic = self.user_topic_table.get_item(member)
+            user_topic['TopicList'] = list_append_item(
+                sns_topic+'|'+subscription_arn, 
+                user_topic['TopicList']
+            )
             user_topic.put()
         else:
             attrs = {
@@ -265,6 +274,7 @@ class ChatgroupHandler(BaseHandler):
         chatgroup.put()
         self.write_json({'result' : 'OK'})
 
+
     @async_login_required
     @gen.coroutine
     def get(self, chatgroup_id=''):
@@ -275,7 +285,8 @@ class ChatgroupHandler(BaseHandler):
             self.set_status(400)
             self.write_json({
                 "result" : "fail"
-                })
+            })
+
         for key, val in chatgroup.itmes():
             if key != 'SNS':
                 response[key] = val
@@ -325,13 +336,14 @@ class ChatgroupHandler(BaseHandler):
             # delete member topic
             member_list = chatgroup['MemberList']
             members = member_list.split(';')
+
             for member in member_list:
                 user_topic = self.user_topic_table.get_item(member)
                 user_topic['TopicList'] = list_delete_item(member+'.*?;', user_topic['TopicList'])
                 user_topic.put()
+
         elif client_data['type'] == 'kickout':
             self.__chatgroup_leave(client_data['who_to_kick_out'],client_data['chatgroup_id'])
-
 
         self.write_json({'result' : 'OK'})
 
