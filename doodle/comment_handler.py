@@ -26,8 +26,7 @@ class CommentHandler(BaseHandler):
         # 160 characters limit
 
         if len(client_data["content"]) >= 200:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'content too long'
                 })
@@ -72,15 +71,13 @@ class CommentHandler(BaseHandler):
         try:
             comment = self.event_comment_table.get_item(comment_id)
         except:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'invalid comment id'
             })
 
         if self.current_userid != comment["CreatorID"]:
-            self.set_status(403)
-            self.write_json({
+            self.write_json_with_status(403,{
                 'result' : 'fail',
                 'reason' : 'Anthantication failed'
                 })
@@ -111,15 +108,13 @@ class CommentHandler(BaseHandler):
         try:
             comment = self.event_comment_table.get_item(comment_id)
         except:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'invalid comment id'
             })
 
         if self.current_userid != comment["CreatorID"]:
-            self.set_status(403)
-            self.write_json({
+            self.write_json_with_status(403,{
                 'result' : 'fail',
                 'reason' : 'Anthantication failed'
             })
@@ -133,30 +128,34 @@ class CommentHandler(BaseHandler):
 
     @async_login_required
     @gen.coroutine
-    def get(self):
+    def get(self,event_id,timestamp,limit):
         """
             get a specific comment
-            PAYLOAD:
-            {
-                'limit'      : 'the limit of number of comments',
-                'timestamp'  : 'a serious timestamp',
-                'event_id'   : 'a serious eventid'
-            }
         """
         # ensure that limit is an integer!!!
-        limit = int(limit)
-
-        if limit <= 10 or limit >= 20:
+        if len(event_id) != 32:
             self.set_status(400)
             self.write_json({
+                'result' : []
+            })
+        try:
+            int(timestamp)
+            limit = int(limit)
+        except:
+            self.set_status(400)
+            self.write_json({
+                'result' : []
+            })
+        if limit <= 10 or limit >= 20:
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'limit is too low or too high'
             })
 
         comments = self.event_comment_table.scan(
             {
-                'EventID' : EQ(client_data['event_id']),
-                'Timestamp' : LE(client_data['timestamp'])
+                'EventID' : EQ(event_id),
+                'Timestamp' : LE(timestamp)
             },
             max_result=limit
         )

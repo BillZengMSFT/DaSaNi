@@ -38,8 +38,7 @@ class FriendHandler(BaseHandler):
                 current_user = self.user_friend_table.get_item(self.current_userid)
                 friend_user = self.user_friend_table.get_item(friend_user_id)
             except:
-                self.set_status(400)
-                self.write_json({
+                self.write_json_with_status(400,{
                     'result' : 'fail',
                     'reason' : 'invalid userid or friend id'
                     })
@@ -69,8 +68,7 @@ class FriendHandler(BaseHandler):
             current_user = self.user_friend_table.get_item(self.current_userid)
             friend_user = self.user_friend_table.get_item(friend_user_id)
         except:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'invalid userid or friend id'
                 })
@@ -107,8 +105,7 @@ class FriendHandler(BaseHandler):
         try:
             current_user = self.user_friend_table.get_item(self.current_userid)
         except:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'invalid userid'
                 })
@@ -141,16 +138,14 @@ class FriendHandler(BaseHandler):
         try:
             current_user = self.user_friend_table.get_item(self.current_userid)
         except:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'invalid userid'
                 })
 
         rel_friend = re.search(friend_user_id, current_user['FriendList'])
         if rel_friend == None:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'invalid friend userid'
                 })

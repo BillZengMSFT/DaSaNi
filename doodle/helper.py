@@ -57,6 +57,6 @@ def list_append_item(to_append_string, list_string):
 def option_value(_dict, key):
     if key in _dict:
         return _dict[key]
-    return ''
+    return ';'
 
 

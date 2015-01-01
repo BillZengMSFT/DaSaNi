@@ -44,14 +44,19 @@ class EventHandler(BaseHandler):
             official = True
         else:
             official = False
+
+        detail = option_value(client_data, 'detail')
+        location = option_value(client_data, 'location')
+
+
         attrs = {
             'EventID'       : event_id,
             'Name'          : client_data['name'],
             'CreatorID'     : self.current_user,
             'MemberList'    : client_data['memberlist'],
             'LikeList'      : ';',
-            'detail'        : sns_arn,
-            'location'      : sqs_arn,
+            'detail'        : detail,
+            'location'      : location,
             'Timestamp'     : timestamp,
             'StartTime'     : client_data['start_time'],
             'EndTime'       : client_data['end_time'],
@@ -100,8 +105,7 @@ class EventHandler(BaseHandler):
             try:
                 event = self.event_table.get_item(event_id)
             except:
-                self.set_status(400)
-                self.write_json({
+                self.write_json_with_status(400,{
                     'result' : 'fail',
                     'reason' : 'invalid event id'
                     })
@@ -112,16 +116,14 @@ class EventHandler(BaseHandler):
                 try:
                     inbox_message = self.user_inbox_table.get_item(inbox_message_id)
                 except:
-                    self.set_status(400)
-                    self.write_json({
+                    self.write_json_with_status(400,{
                         'result' : 'fail',
                         'reason' : 'invalid inbox id'
                         })
                 inbox_message.delete()
                 
             else:
-                self.set_status(400)
-                self.write_json({
+                self.write_json_with_status(400,{
                     'result' : 'fail',
                     'reason' : 'user already joined'
                     })
@@ -138,8 +140,7 @@ class EventHandler(BaseHandler):
         try:
             event = self.event_table.get_item(event_id)
         except:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'invalid event id'
                 })
@@ -151,8 +152,7 @@ class EventHandler(BaseHandler):
         try:
             inbox_message = self.user_inbox_table.get_item(inbox_message_id)
         except:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'invalid message id'
             })
@@ -166,8 +166,7 @@ class EventHandler(BaseHandler):
         try:
             event = self.event_table.get_item(event_id)
         except:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'invalid event id'
             })
@@ -181,8 +180,7 @@ class EventHandler(BaseHandler):
         try:
             event = self.event_table.get_item(event_id)
         except:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'invalid event id'
             })
@@ -193,8 +191,7 @@ class EventHandler(BaseHandler):
                 'result' : 'ok'
             })
         else:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'user already in the like list'
             })
@@ -208,18 +205,124 @@ class EventHandler(BaseHandler):
 
     @async_login_required
     @gen.coroutine
-    def get(self, event_id=''):
-        response = {}
-        try:
-            event = self.event_table.get_item(event_id)
-        except:
-            self.set_status(400)
-            self.write_json({
-                'result' : 'fail',
-                'reason' : 'invalid event id'
+    def get(self, event_id, timestamp='0', limit='20'):
+        if timestamp == '0':
+            response = {}
+            try:
+                event = self.event_table.get_item(event_id)
+            except:
+                self.write_json_with_status(400,{
+                    'result' : 'fail',
+                    'reason' : 'invalid event id'
+                    })
+            for key, val in event.itmes():
+                response[key] = val
+            self.write_json(response)
+        else:
+            if len(event_id) != 32:
+                self.set_status(400)
+                self.write_json({
+                    'result' : []
                 })
-        for key, val in event.itmes():
-            response[key] = val
-        self.write_json(response)
+            try:
+                int(timestamp)
+                limit = int(limit)
+            except:
+                self.set_status(400)
+                self.write_json({
+                    'result' : []
+                })
+            if limit <= 20 or limit >= 30:
+                self.write_json_with_status(400,{
+                    'result' : 'fail',
+                    'reason' : 'limit is too low or too high'
+                })
+            events = self.event_table.scan(
+                {
+                    'EventID' : EQ(event_id),
+                    'Timestamp' : LE(timestamp)
+                },
+                max_result=limit
+            )
+            response = []
+            for event in events:
+                response.append(event)
+
+            if len(response) == 0:
+                self.write_json({
+                    'result' : [],
+                })
+
+            else:
+                # assure comment from latest to early time
+                response = sorted(
+                    response,
+                    key=attrgetter('Timestamp'),
+                    reverse=True)
+
+            self.write_json({
+                'result' : response,
+                'new_timestamp' : response[-1]['Timestamp']
+            })
 
 
+    """
+        Take input dict and validate input dict
+    """
+
+    def input_firewall(self,input_dict):
+
+        outside_field_names = [
+            'eventid',
+            'name',
+            'memberlist',
+            'capacity',
+            'photo'
+        ]
+
+        for key, val in input_dict.items():
+            if key not in outside_field_names:
+                self.set_status(400)
+                self.write_json({ 
+                    'result':'fail',
+                    'reason':'Invalid Field:' + key})
+            try:
+                int(input_dict['capacity'])
+            except:
+                self.set_status(400)
+                self.write_json({ 
+                    'result':'fail',
+                    'reason':'Invalid Field: capacity'})
+
+            
+
+
+
+
+
+    """
+        Take output dict and return filtered dict
+    """
+
+    def output_firewall(self,output_dict):
+        legal_field_names = [
+            'ChatgroupID',
+            'EventID',
+            'Name',
+            'CreatorID',
+            'MemberList',
+            'Capacity',
+            'PhotoID',
+            'SQS',
+            'Timestamp',
+            'chatgroup_id',
+            'sqs',
+            'result',
+        ]
+
+        filtered_output = {}
+        for key, val in output_dict:
+            if key in legal_field_names:
+                filtered_output[key] = val
+
+        return filtered_output
