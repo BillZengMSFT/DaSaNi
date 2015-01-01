@@ -64,7 +64,11 @@ class ChatgroupHandler(BaseHandler):
             'SQS'           : sqs_arn,
             'Timestamp'     : timestamp
         }
-        item = self.chatgroup_table.new_item(attrs=attrs)
+        item = self.chatgroup_table.new_item(
+            hash_key=chatgroup_id,
+            range_key=None,
+            attrs=attrs
+            )
         item.put()
 
         members = memberlist.split(';')
@@ -76,7 +80,7 @@ class ChatgroupHandler(BaseHandler):
         })
 
     """
-        accept application / accept invitation / leave  
+        accept application / accept invitation / leave / update
     """
 
     @async_login_required
@@ -87,12 +91,15 @@ class ChatgroupHandler(BaseHandler):
         choice = client_data['choice']
         chatgroup_id = client_data['chatgroup_id']
         inbox_id = client_data['inbox_message_id']
+        attrs = client_data['attrs']
         if request_type == 'application':
-            self.__chatgroup_application(client_data['who_apply'], chatgroup_id, self.current_user, choice, inbox_message_id)
+            self.__chatgroup_application(client_data['who_apply'], chatgroup_id, self.current_userid, choice, inbox_message_id)
         elif request_type == 'invitation':
-            self.__chatgroup_invitation(client_data['who_invite'], chatgroup_id, self.current_user, choice, inbox_message_id)
+            self.__chatgroup_invitation(client_data['who_invite'], chatgroup_id, self.current_userid, choice, inbox_message_id)
         elif request_type == 'leave':
             self.__chatgroup_leave(client_data['who_leave'], chatgroup_id, inbox_message_id)
+        elif request_type == 'update':
+            self.__chatgroup_update(chatgroup_id,client_data['attrs'])
 
     """
         Create or update user's joined topic list
@@ -122,10 +129,11 @@ class ChatgroupHandler(BaseHandler):
             except:
                 self.set_status(400)
                 self.write_json({
-                    "result" : "fail"
+                    'result' : 'fail',
+                    'reason' : 'invalid chatgroup id'
                     })
             if re.search(who_apply, chatgroup['MemberList']) == None:
-                chatgroup['MemberList'] = list_append_item(chatgroup['MemberList'], who_apply)
+                chatgroup['MemberList'] = list_append_item(who_apply,chatgroup['MemberList'] )
 
             sns_topic = chatgroup['SNS']
 
@@ -135,7 +143,8 @@ class ChatgroupHandler(BaseHandler):
             except:
                 self.set_status(400)
                 self.write_json({
-                    "result" : "fail"
+                    'result' : 'fail',
+                    'reason' : 'invalid userid'
                     })
             sns_token = user_apns_sns['SNSToken']
             response = self.sns.subscribe(sns_topic, 'application', sns_token)
@@ -150,7 +159,8 @@ class ChatgroupHandler(BaseHandler):
             except:
                 self.set_status(400)
                 self.write_json({
-                    "result" : "fail"
+                    'result' : 'fail',
+                    'reason' : 'invalid userid'
                     })
             message = who_to_join['Firstname']+' '+who_to_join['Lastname']+' joined this group :)'
             self.sns.publish(
@@ -164,7 +174,8 @@ class ChatgroupHandler(BaseHandler):
         except:
             self.set_status(400)
             self.write_json({
-                "result" : "fail"
+                'result' : 'fail',
+                'reason' : 'invalid inbox id'
                 })
         inbox_message.delete()
 
@@ -188,13 +199,12 @@ class ChatgroupHandler(BaseHandler):
         except:
             self.set_status(400)
             self.write_json({
-                "result" : "fail"
+                'result' : 'fail',
+                'reason' : 'invalid chatgroup id'
                 })
         if re.search(who_leave, chatgroup['MemberList']) != None:
-            members = chatgroup['MemberList'].split(who_leave+';')
-            chatgroup['MemberList'] = ''
-            for member in members:
-                chatgroup['MemberList'] += member
+            chatgroup['MemberList'] = list_delete_item(who_leave + ".*?;", chatgroup['MemberList'])
+            chatgroup.put()
 
         sns_topic = chatgroup['SNS']
 
@@ -204,7 +214,8 @@ class ChatgroupHandler(BaseHandler):
         except:
             self.set_status(400)
             self.write_json({
-                "result" : "fail"
+                'result' : 'fail',
+                'reason' : 'invalid userid'
             })
         match = re.search(sns_topic+'.*?;', user_topic['TopicList'])
         if match:
@@ -224,7 +235,8 @@ class ChatgroupHandler(BaseHandler):
             except:
                 self.set_status(400)
                 self.write_json({
-                    "result" : "fail"
+                    'result' : 'fail',
+                    'reason' : 'invalid userid'
                     })
             message = who_to_leave['Firstname']+' '+who_to_leave['Lastname']+' leave this group :)'
             self.sns.publish(
@@ -238,7 +250,8 @@ class ChatgroupHandler(BaseHandler):
         except:
             self.set_status(400)
             self.write_json({
-                "result" : "fail"
+                'result' : 'ok',
+                'reason' : 'invalid message id'
             })
         inbox_message.delete()
 
@@ -248,6 +261,20 @@ class ChatgroupHandler(BaseHandler):
     """
         Get specific chatgroup info
     """
+
+    def __chatgroup_update(self,chatgroup_id, attrs):
+        self.input_firewall(attrs)
+        try:
+            chatgroup = self.chatgroup_table.get_item(chatgroup_id)
+        except:
+            self.set_status(400)
+            self.write_json({
+                'result' : 'fail',
+                'reason' : 'invalid chatgroup id'
+            })
+        chatgroup.update(attrs)
+        chatgroup.put()
+        self.write_json({'result' : 'OK'})
 
     @async_login_required
     @gen.coroutine

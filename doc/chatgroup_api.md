@@ -37,8 +37,9 @@ PAYLOAD:
         'chatgroup_id'      : 'chatgroup to join',
         'inbox_message_id'  : 'spcific inbox message id',
         'who_apply'         : 'optional user who apply for chatgroup, required for application',
-        'who_invite'        : 'optional user who invite, required for invitation'
-        'who_leave'         : 'optional user who leave, required for leave'
+        'who_invite'        : 'optional user who invite, required for invitation',
+        'who_leave'         : 'optional user who leave, required for leave',
+        'attrs'             : 'json format string containing new information about this chatgroup'
     }
 
 RETURN:
