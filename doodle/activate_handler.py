@@ -40,9 +40,12 @@ class ActivateHandler(BaseHandler):
                 code : ACTIVATECODE ## EX: '5DE3C'
             }
         '''
-        code = self.data['code']
-        userid = self.data['userid']
-        code_is_real =  self.user_activate_table.has_item(userid)
+        # read code and userid from json
+        code            = self.data['code']
+        userid          = self.data['userid']
+
+        # if the code is true then activate the account
+        code_is_real    =  self.user_activate_table.has_item(userid)
         if code_is_real:
             activator = yield gen.maybe_future(self.user_activate_table.get_item(userid))
             if activator['Code'] == code:
@@ -51,6 +54,7 @@ class ActivateHandler(BaseHandler):
                 yield gen.maybe_future(user_data.put())
                 yield gen.maybe_future(activator.delete())
 
+                # create items in tables for the new account
                 new_user_topic_list= self.user_topic_table.new_item(
                     hash_key=hashed_userid,
                     range_key=None,
@@ -68,8 +72,6 @@ class ActivateHandler(BaseHandler):
                     range_key=None,
                     attrs={"EventList" : ";"}
                     )
-
-                
                 yield gen.maybe_future(new_user_topic_list.put())
                 yield gen.maybe_future(new_user_friend_list.put())
                 yield gen.maybe_future(new_user_event_list.put())
@@ -78,11 +80,13 @@ class ActivateHandler(BaseHandler):
                 self.write_json({
                     'result' : 'ok'
                     })
+
             else:
+                # wrong code
                 self.set_status(403)
                 self.write_json({
                     'result' : 'fail',
-                    'reason' : 'Authantication failed'
+                    'reason' : 'authantication failed'
                 })
                 return
 
@@ -99,6 +103,7 @@ class ActivateHandler(BaseHandler):
         '''
         userid = self.data['userid']
         try:
+            # try to retrieve user data and activator
             user_data = yield gen.maybe_future(self.user_table.get_item(userid))
             activator = yield gen.maybe_future(self.user_activate_table.get_item(userid))
         except:
@@ -107,8 +112,10 @@ class ActivateHandler(BaseHandler):
                 'result' : 'fail',
                 'reason' : 'invaild userid'
                 })
+        # increment on counter
         activator['Attempt'] = activator['Attempt'] + 1
         if activator['Attempt'] > 3:
+            # no more than 3 emails per day per user
             self.write_json({
                 'result' : 'fail',
                 'reason' : 'too many attempts recorded'
@@ -126,6 +133,7 @@ class ActivateHandler(BaseHandler):
                 'reason' : 'failed to send email'
             })
             return
+
         # update dynamo
 
         activator['Code'] = activate_code
@@ -150,6 +158,7 @@ class ActivateHandler(BaseHandler):
                 'result' : 'fail',
                 'reason' : 'invalid userid'
                 })
+        # a simple check on user_data
         if user_data['AccountActive'] == True:
             self.write_json({
                 'result' : 'ok'

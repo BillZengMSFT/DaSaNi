@@ -42,8 +42,6 @@ class AuthHandler(BaseHandler):
 
         self.user_logout(userid)
 
-        # check if the user is activated
-
         # split and subscribe user's topics
         if self.user_topic_table.has_item(userid):
             topic_and_subid = self.user_topic_table.get_item(userid)

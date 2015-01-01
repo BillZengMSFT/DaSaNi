@@ -99,14 +99,13 @@ class BaseHandler(tornado.web.RequestHandler):
 
 
 """ Apply for asynchronous call
-
 """
 
 def async_login_required(fun):
     @wraps(fun)
     @gen.coroutine
     def __decorator(self, *args, **kw):
-        user = yield self.authorize_user()
+        userid = yield self.authorize_user()
         if not user:
             self.set_status(403)
             self.write_json({
@@ -114,7 +113,7 @@ def async_login_required(fun):
                 'reason' : 'Authantication failed'
                 })
             return
-        self.current_userid = user
+        self.current_userid = userid
         yield fun(self, *args, **kw)
 
     return __decorator
