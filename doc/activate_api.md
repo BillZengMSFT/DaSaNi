@@ -9,8 +9,8 @@
 ```
 PAYLOAD:
     {
-        userid: USERID
-        code : ACTIVATECODE ## EX: "5DE3C"
+        "userid": "USERID"
+        "code" : "ACTIVATECODE" ## EX: "5DE3C"
     }
 ```
 
@@ -19,7 +19,7 @@ PAYLOAD:
 ```
 PAYLOAD:
     {
-        userid: USERID
+        "userid": "USERID"
     }
 ```
 
