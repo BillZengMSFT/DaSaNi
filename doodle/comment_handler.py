@@ -22,12 +22,16 @@ class CommentHandler(BaseHandler):
         """
             post a new comment on a event
         """
+
+        # 160 characters limit
+
         if len(client_data["content"]) >= 200:
             self.set_status(400)
             self.write_json({
                 'result' : 'fail',
                 'reason' : 'content too long'
                 })
+
         client_data = self.data
         now = str(time.time())
         comment_id = md5(client_data['content']+now)
@@ -63,27 +67,32 @@ class CommentHandler(BaseHandler):
             }
         """
         client_data = self.data
+        comment_id = client_data['comment_id']
+
         try:
-            comment = self.event_comment_table.get_item(client_data['comment_id'])
+            comment = self.event_comment_table.get_item(comment_id)
         except:
             self.set_status(400)
             self.write_json({
                 'result' : 'fail',
                 'reason' : 'invalid comment id'
-                })
+            })
+
         if self.current_userid != comment["CreatorID"]:
             self.set_status(403)
             self.write_json({
                 'result' : 'fail',
                 'reason' : 'Anthantication failed'
                 })
+
         comment['Coentent'] = client_data['data']
         comment['Timestamp'] = str(time.time())
         comment.put()
+
         self.write_json({
             'comment_id' : comment_id,
             'Timestamp' : comment['Timestamp']
-            })
+        })
 
 
     @async_login_required
@@ -97,21 +106,26 @@ class CommentHandler(BaseHandler):
             }
         """
         client_data = self.data
+        comment_id = client_data['comment_id']
+
         try:
-            comment = self.event_comment_table.get_item(client_data['comment_id'])
+            comment = self.event_comment_table.get_item(comment_id)
         except:
             self.set_status(400)
             self.write_json({
                 'result' : 'fail',
                 'reason' : 'invalid comment id'
-                })
+            })
+
         if self.current_userid != comment["CreatorID"]:
             self.set_status(403)
             self.write_json({
                 'result' : 'fail',
                 'reason' : 'Anthantication failed'
-                })
+            })
+
         comment.delete()
+
         self.write_json({
             "result" : 'ok',
             })
@@ -131,29 +145,43 @@ class CommentHandler(BaseHandler):
         """
         # ensure that limit is an integer!!!
         limit = int(limit)
-        if limit<= 10 or limit >= 20:
+
+        if limit <= 10 or limit >= 20:
             self.set_status(400)
             self.write_json({
                 'result' : 'fail',
-                'reason' : 'limit is too high or too low'
-                })
+                'reason' : 'limit is too low or too high'
+            })
+
         comments = self.event_comment_table.scan(
             {
-            'EventID' : EQ(client_data['event_id']),
-            'Timestamp' : LE(client_data['timestamp'])
+                'EventID' : EQ(client_data['event_id']),
+                'Timestamp' : LE(client_data['timestamp'])
             },
             max_result=limit
-            )
+        )
+
         response = []
         for comment in comments:
             response.append(comment)
+
         if len(response) == 0:
             self.write_json({
-            'result' : response,
+                'result' : [],
             })
+
         else:
-            response = sorted(response,key=attrgetter('Timestamp'),reverse=True)
+            # assure comment from latest to early time
+            response = sorted(
+                response,
+                key=attrgetter('Timestamp'),
+                reverse=True)
+
         self.write_json({
             'result' : response,
             'new_timestamp' : response[-1]['Timestamp']
-            })
+        })
+
+
+
+

@@ -5,7 +5,7 @@
     Create a new user or update a user info
 
 ```
-All fields no longer than 20 characters.
+All fields no longer than 30 characters except email is 50.
 
 Model Fields:
 

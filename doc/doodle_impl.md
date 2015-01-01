@@ -1,10 +1,10 @@
-``` This doc elaborate implementation detail about what each API is doing and what client need to do as a whole system```
+```This doc elaborate implementation detail about what each API is doing and what client need to do as a whole system```
 
 ##### User Registry
 
 > Process
 
-``` 
+```
 -> mobile Post {email, firstname, lastname} 
 -> Receive email 
 -> mobile Put activate code to activate 

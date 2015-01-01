@@ -6,18 +6,18 @@
 
 > post* : /api/v1/comment/create
 
-```
-	post a new comment.
+        post a new comment.
 
+```
 PAYLOAD:
-            {
-                'event_id' : 'a serious event id',
-                'creator_id': 'a serious user id',
-                'content'   : '{
-                    'type'  : 'ext',
-                    'message' : 'text or a link'
-                }"
-            }
+    {
+        'event_id'  : 'a serious event id',
+        'creator_id': 'a serious user id',
+        'content'   : '{
+            'type'  : 'text',
+            'message' : 'text'
+        }"
+    }
 
 RETURN:
     {
@@ -28,10 +28,9 @@ RETURN:
 
 > put* : /api/v1/comment/edit
 
+    edit a comment. This method is for future uses.
+
 ```
-	edit a comment. This method is for future uses.
-
-
 PAYLOAD:
     {
         'comment_id' : 'a serious comment id'
@@ -42,8 +41,9 @@ PAYLOAD:
 
 > get* : /api/v1/comment/get
 
-```
     Return a group of comments.
+
+```
     PAYLOAD:
 	    {
 	        'limit'      : 'the limit of number of comments, should be an integer between 10 and 20',
@@ -54,8 +54,9 @@ PAYLOAD:
 
 > delete* : /api/v1/comment/delete
 
+    Remove a comment.
+
 ```
-	Remove a comment.
 	PAYLOAD:
 		{
             'comment_id' : 'a serious comment id'

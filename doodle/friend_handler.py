@@ -22,8 +22,16 @@ class FriendHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         client_data = self.data
+        
+        # route to different functionality
+
+        # test if friend
+
         if client_data['type'] == 'test':
-            self.test_friendship()
+            self.__test_friendship()
+
+        # create a friendship
+
         elif client_data['type'] == 'create':
             friend_user_id = client_data['friend']
             try:
@@ -35,6 +43,7 @@ class FriendHandler(BaseHandler):
                     'result' : 'fail',
                     'reason' : 'invalid userid or friend id'
                     })
+
             rel_friend = re.search(friend_user_id, current_user['FriendList'])
             if rel_friend == None:
                 current_user['FriendList'] = list_append_item(friend_user_id, current_user['FriendList'])
@@ -44,9 +53,10 @@ class FriendHandler(BaseHandler):
             if rel_friend == None:
                 friend_user['FriendList'] =list_append_item(self.current_userid, friend_user['FriendList'])
                 friend_user.put()
-                self.write_json({
-                    'result':'ok'
-                })
+
+            self.write_json({
+                'result':'ok'
+            })
 
 
     @async_login_required
@@ -54,6 +64,7 @@ class FriendHandler(BaseHandler):
     def delete(self):
         client_data = self.data
         friend_user_id = client_data['friend']
+
         try:
             current_user = self.user_friend_table.get_item(self.current_userid)
             friend_user = self.user_friend_table.get_item(friend_user_id)
@@ -63,6 +74,7 @@ class FriendHandler(BaseHandler):
                 'result' : 'fail',
                 'reason' : 'invalid userid or friend id'
                 })
+
         rel_friend = re.search(friend_user_id, current_user['FriendList'])
         if rel_friend != None:
             friends = current_user['FriendList'].split(friend_user_id+';')
@@ -79,9 +91,10 @@ class FriendHandler(BaseHandler):
                 friend_user['FriendList']
                 )
             friend_user.put()
-            self.write_json({
-                'result':'ok'
-            })
+
+        self.write_json({
+            'result':'ok'
+        })
         
         
 
@@ -90,6 +103,7 @@ class FriendHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         response = []
+        
         try:
             current_user = self.user_friend_table.get_item(self.current_userid)
         except:
@@ -98,21 +112,32 @@ class FriendHandler(BaseHandler):
                 'result' : 'fail',
                 'reason' : 'invalid userid'
                 })
+
         friend_list = current_user['FriendList'].split(';')
+
         for uid in friend_list:
             if uid != '':
-                user = self.user_table.get_item(uid)
+
+                try:
+                    user = self.user_table.get_item(uid)
+                except:
+                    # save me san francisco
+                    friend_user['FriendList'] = list_remove_item(
+                        uid + '.*?;',
+                        friend_user['FriendList']
+                    )
+
                 cleaned_user = user_object_filter(user)
                 response.append(cleaned_user)
 
         self.write_json({'result' : response})
 
 
-    @async_login_required
     @gen.coroutine
-    def test_friendship(self):
+    def __test_friendship(self):
         client_data = self.data
         friend_user_id = client_data['friend']
+        
         try:
             current_user = self.user_friend_table.get_item(self.current_userid)
         except:
@@ -121,11 +146,13 @@ class FriendHandler(BaseHandler):
                 'result' : 'fail',
                 'reason' : 'invalid userid'
                 })
+
         rel_friend = re.search(friend_user_id, current_user['FriendList'])
         if rel_friend == None:
+            self.set_status(400)
             self.write_json({
                 'result' : 'fail',
-                'reason' : 'invalid friendid'
+                'reason' : 'invalid friend userid'
                 })
         else:
             self.write_json({'result' : 'ok'})

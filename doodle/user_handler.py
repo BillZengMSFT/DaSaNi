@@ -2,7 +2,6 @@
 
 import tornado
 import json
-import werkzeug
 from tornado import gen
 from dynamo import User
 from .base_handler import *
@@ -26,15 +25,16 @@ class UserHandler(BaseHandler):
     def post(self):
 
         self.input_firewall(self.data)
+
         # Get email from client and hash it
 
         password = self.data['password']
         email = self.data['email'].strip()
 
         hashed_userid = md5(email)
+
         # Check if this email has been registered
-        
-        
+               
         user_exist = yield gen.maybe_future(self.user_table.has_item(hashed_userid))
 
         if user_exist == True:
@@ -45,8 +45,6 @@ class UserHandler(BaseHandler):
                 'result' : 'fail',
                 'reason' : 'email already used'
                 })
-            return
-
 
         hashed_password = hash_password(password)
         
@@ -76,10 +74,13 @@ class UserHandler(BaseHandler):
             )
         except:
             self.set_status(400)
-            return
+            self.write_json({
+                'result' : 'fail',
+                'reason' : 'failed to send email'
+            })
 
         activator_attrs = {
-            "Timestamp"      : str(time.time()).split(".")[0],
+            "Timestamp" : str(time.time()).split(".")[0],
             "Code"      : activate_code,
             "Attempt"   : 1
         }
@@ -105,9 +106,9 @@ class UserHandler(BaseHandler):
     @gen.coroutine
     def put(self):
         self.input_firewall(self.data)
-        user_data = self.user_table.get_item(self.current_userid)
-        user_data.update(self.data)
-        current_user.data.put()
+        user = self.user_table.get_item(self.current_userid)
+        user.update(self.data)
+        user.put()
         self.write_json({'result': 'OK'})
 
 
@@ -116,9 +117,9 @@ class UserHandler(BaseHandler):
     @gen.coroutine
     def get(self):
         userid = self.current_userid
-        user_data = self.user_table.get_item(userid)
+        user = self.user_table.get_item(userid)
         # filter output information
-        user_data = self.output_firewall(user_data)
+        user_data = self.output_firewall(user)
         self.write_json({
             'user': user_data
         })
@@ -147,10 +148,10 @@ class UserHandler(BaseHandler):
 
         for key, val in input_dict.items():
             
-            if key == "email" and len(val)>50:
+            if key == "email" and len(val) > 50:
                 self.set_status(400)
                 self.write_json({ "result":"fail : Invalid Field: "+key})
-            if key not in outside_field_names or (key != "email" and key != "gender" and len(val)> 20):
+            if key not in outside_field_names or (key != "email" and key != "gender" and len(val) > 30):
                 self.set_status(400)
                 self.write_json({ "result":"fail : Invalid Field: "+key})
             if key == 'phone' and not re.match('\d{3}-\d{3}-\d{4}', val):

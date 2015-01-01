@@ -18,7 +18,7 @@ class ClientHandler(BaseHandler):
         response = self.sns.create_platform_endpoint(
             AWS_SNS_IOS_APP_ARN,
             device_token
-            )
+        )
         aws_endpoint_arn = response['CreatePlatformEndpointResponse']['CreatePlatformEndpointResult']['EndpointArn']
         return aws_endpoint_arn
 
@@ -32,9 +32,9 @@ class ClientHandler(BaseHandler):
         aws_endpoint_arn = self.add_sns_app_endpoint()
         userid = self.current_userid
         attrs = {
-            'UserID' : userid, 
+            'UserID'    : userid, 
             'APNsToken' : self.data['deviceToken'], 
-            'SNSToken' : aws_endpoint_arn
+            'SNSToken'  : aws_endpoint_arn
             }
         item = self.user_apns_sns_table.new_item(
             hash_key=userid,
