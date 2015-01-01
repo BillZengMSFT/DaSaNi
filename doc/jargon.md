@@ -90,7 +90,7 @@ PINE_TABLE = "Pine_Table"
 
 ```
 Bool in dynamo is stored as Number, so NEVER use:
-Bad  : some_var is True
+Bad  : ~~some_var is True~~
 Good : some_var == True
 ```
 
