@@ -273,11 +273,11 @@ class EventHandler(BaseHandler):
     def input_firewall(self,input_dict):
 
         outside_field_names = [
-            'eventid',
             'name',
-            'memberlist',
             'capacity',
-            'photo'
+            'photo',
+            'start_time',
+            'end_time',
         ]
 
         for key, val in input_dict.items():
@@ -306,20 +306,16 @@ class EventHandler(BaseHandler):
 
     def output_firewall(self,output_dict):
         legal_field_names = [
-            'ChatgroupID',
+            'event_id',
             'EventID',
             'Name',
             'CreatorID',
             'MemberList',
             'Capacity',
             'PhotoID',
-            'SQS',
             'Timestamp',
-            'chatgroup_id',
-            'sqs',
-            'result',
+            'result'
         ]
-
         filtered_output = {}
         for key, val in output_dict:
             if key in legal_field_names:
