@@ -97,7 +97,7 @@ class ChatgroupHandler(BaseHandler):
         elif request_type == 'invitation':
             self.__chatgroup_invitation(client_data['who_invite'], chatgroup_id, self.current_userid, choice, inbox_message_id)
         elif request_type == 'leave':
-            self.__chatgroup_leave(client_data['who_leave'], chatgroup_id, inbox_message_id)
+            self.__chatgroup_leave(client_data['who_leave'], chatgroup_id)
         elif request_type == 'update':
             self.__chatgroup_update(chatgroup_id,client_data['attrs'])
 
@@ -192,7 +192,7 @@ class ChatgroupHandler(BaseHandler):
     def __chatgroup_invitation(self, who_invite, chatgroup_id, who_decide, choice, inbox_message_id):
         self.__chatgroup_application(who_decide, chatgroup_id, who_decide, choice, inbox_message_id)
 
-    def __chatgroup_leave(self, who_leave, chatgroup_id, inbox_message_id):
+    def __chatgroup_leave(self, who_leave, chatgroup_id):
         # update chatgroup member list to delete user id
         try:
             chatgroup = self.chatgroup_table.get_item(chatgroup_id)
@@ -243,17 +243,6 @@ class ChatgroupHandler(BaseHandler):
                 topic=sns_topic,
                 message=message
             )
-
-        # delete inbox message
-        try:
-            inbox_message = self.user_inbox_table.get_item(inbox_message_id)
-        except:
-            self.set_status(400)
-            self.write_json({
-                'result' : 'ok',
-                'reason' : 'invalid message id'
-            })
-        inbox_message.delete()
 
         # return chatgroup info
         self.write_json({'result' : 'OK'})        
@@ -310,31 +299,39 @@ class ChatgroupHandler(BaseHandler):
         except:
             self.set_status(400)
             self.write_json({
-                "result" : "fail"
+                'result' : 'fail',
+                'reason' : 'invalid chatgroup id'
                 })
         if chatgroup['creator_id'] != self.current_userid:
             self.set_status(400)
-            self.write_json({'result' : 'unauthorized to remove chatgroup'})
+            self.write_json({
+                'result' : 'fail',
+                'reason' : 'authantication failed'
+                })
         sns_arn = chatgroup['SNS']
-        message = 'This chatgroup is dismissed by group owner :('
-        self.sns.publish(
-            topic=sns_arn,
-            message=message
-        )
-        sqs_arn = chatgroup['SQS']
-        self.sqs.delete_queue(sqs_arn)
-        self.sns.delete_topic(sns_arn)
-        chatgroup['SQS'] = ';'
-        chatgroup['SNS'] = ';'
-        chatgroup.put()
-        
-        # delete member topic
-        member_list = chatgroup['MemberList']
-        members = member_list.split(';')
-        for member in member_list:
-            user_topic = self.user_topic_table.get_item(member)
-            user_topic['TopicList'] = list_delete_item(member+'.*?;', user_topic['TopicList'])
-            user_topic.put()
+        if self.data['type'] == 'dismiss':
+            message = 'This chatgroup is dismissed by group owner :('
+            self.sns.publish(
+                topic=sns_arn,
+                message=message
+            )
+            sqs_arn = chatgroup['SQS']
+            self.sqs.delete_queue(sqs_arn)
+            self.sns.delete_topic(sns_arn)
+            chatgroup['SQS'] = ';'
+            chatgroup['SNS'] = ';'
+            chatgroup.put()
+            
+            # delete member topic
+            member_list = chatgroup['MemberList']
+            members = member_list.split(';')
+            for member in member_list:
+                user_topic = self.user_topic_table.get_item(member)
+                user_topic['TopicList'] = list_delete_item(member+'.*?;', user_topic['TopicList'])
+                user_topic.put()
+        elif client_data['type'] == 'kickout':
+            self.__chatgroup_leave(client_data['who_to_kick_out'],client_data['chatgroup_id'])
+
 
         self.write_json({'result' : 'OK'})
 

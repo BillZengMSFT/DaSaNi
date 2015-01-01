@@ -77,8 +77,10 @@ RETURN:
 ```
 PAYLOAD:
     {
+        'type'              : either 'dismiss' or 'kickout'
         'chatgroup_id'      : 'chatgroup to join',
-        'creator_id'        : 'creator user id'
+        'creator_id'        : 'creator user id',
+        'who_to_kick_out'   : 'a disgasting user id, required if type is kickout'
     }
 ```
 
