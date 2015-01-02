@@ -28,6 +28,7 @@ class AuthHandler(BaseHandler):
             client_data['password'],
             self.dynamo
             )
+        
         # verify user logged in
         
         if not userid:
