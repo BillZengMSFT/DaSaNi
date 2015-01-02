@@ -136,8 +136,7 @@ class ChatgroupHandler(BaseHandler):
             try:
                 chatgroup = self.chatgroup_table.get_item(chatgroup_id)
             except:
-                self.set_status(400)
-                self.write_json({
+                self.write_json_with_status(400,{
                     'result' : 'fail',
                     'reason' : 'invalid chatgroup id'
                     })
@@ -150,8 +149,7 @@ class ChatgroupHandler(BaseHandler):
             try:
                 user_apns_sns = self.user_apns_sns_table.get_item(who_apply)
             except:
-                self.set_status(400)
-                self.write_json({
+                self.write_json_with_status(400,{
                     'result' : 'fail',
                     'reason' : 'invalid userid'
                     })
@@ -166,8 +164,7 @@ class ChatgroupHandler(BaseHandler):
             try:
                 who_to_join = self.user_table.get_item(who_apply)
             except:
-                self.set_status(400)
-                self.write_json({
+                self.write_json_with_status(400,{
                     'result' : 'fail',
                     'reason' : 'invalid userid'
                     })
@@ -181,8 +178,7 @@ class ChatgroupHandler(BaseHandler):
         try:
             inbox_message = self.user_inbox_table.get_item(inbox_message_id)
         except:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'invalid inbox id'
                 })
@@ -206,8 +202,7 @@ class ChatgroupHandler(BaseHandler):
         try:
             chatgroup = self.chatgroup_table.get_item(chatgroup_id)
         except:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'invalid chatgroup id'
                 })
@@ -221,8 +216,7 @@ class ChatgroupHandler(BaseHandler):
         try:
             user_topic = self.user_topic.get_item(member)
         except:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'invalid userid'
             })
@@ -242,8 +236,7 @@ class ChatgroupHandler(BaseHandler):
             try:
                 who_to_leave = self.user_table.get_item(who_leave)
             except:
-                self.set_status(400)
-                self.write_json({
+                self.write_json_with_status(400,{
                     'result' : 'fail',
                     'reason' : 'invalid userid'
                     })
@@ -265,8 +258,7 @@ class ChatgroupHandler(BaseHandler):
         try:
             chatgroup = self.chatgroup_table.get_item(chatgroup_id)
         except:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'invalid chatgroup id'
             })
@@ -308,14 +300,12 @@ class ChatgroupHandler(BaseHandler):
         try:
             chatgroup = self.chatgroup_table.get_item(chatgroup_id)
         except:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'invalid chatgroup id'
                 })
         if chatgroup['creator_id'] != self.current_userid:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'authantication failed'
                 })
@@ -348,6 +338,67 @@ class ChatgroupHandler(BaseHandler):
         self.write_json({'result' : 'OK'})
 
 
+
+    """
+        Take input dict and validate input dict
+    """
+
+    def input_firewall(self,input_dict):
+
+        outside_field_names = [
+            'eventid',
+            'name',
+            'memberlist',
+            'capacity',
+            'photo'
+        ]
+
+        for key, val in input_dict.items():
+            if key not in outside_field_names:
+                self.set_status(400)
+                self.write_json({ 
+                    'result':'fail',
+                    'reason':'Invalid Field:' + key})
+            try:
+                int(input_dict['capacity'])
+            except:
+                self.set_status(400)
+                self.write_json({ 
+                    'result':'fail',
+                    'reason':'Invalid Field: capacity'})
+
+            
+
+
+
+
+
+    """
+        Take output dict and return filtered dict
+    """
+
+    def output_firewall(self,output_dict):
+        legal_field_names = [
+            'ChatgroupID',
+            'EventID',
+            'Name',
+            'CreatorID',
+            'MemberList',
+            'Capacity',
+            'PhotoID',
+            'SQS',
+            'Timestamp',
+            'chatgroup_id',
+            'sqs',
+            'result',
+        ]
+
+        filtered_output = {}
+        for key, val in output_dict:
+            if key in legal_field_names:
+                filtered_output[key] = val
+
+        return filtered_output
 
 
 

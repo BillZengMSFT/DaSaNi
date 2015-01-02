@@ -39,18 +39,10 @@ PAYLOAD:
 
 ```
 
-> get* : /api/v1/comment/get
+> get* : /api/v1/comment/(event_id)/(timestamp)/(limit)
 
     Return a group of comments.
-
-```
-    PAYLOAD:
-	    {
-	        'limit'      : 'the limit of number of comments, should be an integer between 10 and 20',
-	        'timestamp'  : 'a serious timestamp',
-	        'event_id'   : 'a serious eventid'
-	    }
-```
+    
 
 > delete* : /api/v1/comment/delete
 

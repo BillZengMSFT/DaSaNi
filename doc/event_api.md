@@ -10,7 +10,6 @@
 PAYLOAD:
     {
         'name'          : 'a chatgroup name',
-        'memberlist'    : 'userid_0;userid_1;...',
         'capacity'      : 'a number of capacity',
         'photo'         : 'a photo url',
         'start_time'    : 'start time, a unix timestamp',
@@ -27,9 +26,6 @@ RETURN:
 > put* : /api/v1/event/put
 
 ```
-Accept or reject application or invitation / leave a chatgroup
-
-
 PAYLOAD:
     {
         'type'              : 'application or invitation or leave or update',
@@ -52,7 +48,10 @@ RETURN:
 
 ```
 
-> get : /api/v1/event/get/(event_id)
+> get : /api/v1/event/(event_id)
+        /api/v1/event/(event_id)/(timestamp)/(limit)
+    If timestamp and limit is present, then it's fetching a list of events.
+    Otherwise it's only fetching one event by its event id.
 
 ```
     Return specific chatgroup info

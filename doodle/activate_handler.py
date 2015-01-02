@@ -83,8 +83,7 @@ class ActivateHandler(BaseHandler):
 
             else:
                 # wrong code
-                self.set_status(403)
-                self.write_json({
+                self.write_json_with_status(403,{
                     'result' : 'fail',
                     'reason' : 'authantication failed'
                 })
@@ -107,8 +106,7 @@ class ActivateHandler(BaseHandler):
             user_data = yield gen.maybe_future(self.user_table.get_item(userid))
             activator = yield gen.maybe_future(self.user_activate_table.get_item(userid))
         except:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'invaild userid'
                 })
@@ -153,8 +151,7 @@ class ActivateHandler(BaseHandler):
         try:
             user_data = yield gen.maybe_future(self.user_table.get_item(userid))
         except:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'invalid userid'
                 })

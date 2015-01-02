@@ -40,8 +40,7 @@ class UserHandler(BaseHandler):
         if user_exist == True:
 
             # tell client and stop processing this request
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'email already used'
                 })
@@ -73,8 +72,7 @@ class UserHandler(BaseHandler):
                 )
             )
         except:
-            self.set_status(400)
-            self.write_json({
+            self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'failed to send email'
             })
@@ -148,18 +146,26 @@ class UserHandler(BaseHandler):
 
         for key, val in input_dict.items():
             
-            if key == "email" and len(val) > 50:
+            if key == 'email' and len(val) > 50:
                 self.set_status(400)
-                self.write_json({ "result":"fail : Invalid Field: "+key})
+                self.write_json({ 
+                    'result':'fail',
+                    'reason':'Invalid Field:' + key})
             if key not in outside_field_names or (key != "email" and key != "gender" and len(val) > 30):
                 self.set_status(400)
-                self.write_json({ "result":"fail : Invalid Field: "+key})
+                self.write_json({ 
+                    'result':'fail',
+                    'reason':'Invalid Field:' + key})
             if key == 'phone' and not re.match('\d{3}-\d{3}-\d{4}', val):
                 self.set_status(400)
-                self.write_json({ "result":"fail : Invalid Field: "+key})
+                self.write_json({ 
+                    'result':'fail',
+                    'reason':'Invalid Field:' + key})
             if key == 'email' and not re.match(r'[a-zA-Z0-9]+@[a-z]+\.edu', val):
                 self.set_status(400)
-                self.write_json({ "result":"fail : Invalid Field: "+key})
+                self.write_json({ 
+                    'result':'fail',
+                    'reason':'Invalid Field:' + key})
 
 
 

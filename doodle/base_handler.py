@@ -97,6 +97,10 @@ class BaseHandler(tornado.web.RequestHandler):
         self.write(json_encode(data))
         self.finish()
 
+    def write_json_with_status(self, status, data):
+        self.set_status(status)
+        self.write_json(data)
+
 
 """ Apply for asynchronous call
 """
@@ -107,8 +111,7 @@ def async_login_required(fun):
     def __decorator(self, *args, **kw):
         userid = yield self.authorize_user()
         if not user:
-            self.set_status(403)
-            self.write_json({
+            self.write_json_with_status(403,{
                 'result' : 'fail',
                 'reason' : 'Authantication failed'
                 })
@@ -128,8 +131,7 @@ def login_required(fun):
     def __decorator(self, *args, **kw):
         user = yield self.authorize_user()
         if not user:
-            self.set_status(403)
-            self.write_json({
+            self.write_json_with_status(403,{
                 'result' : 'fail',
                 'reason' : 'Authantication failed'
                 })

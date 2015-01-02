@@ -32,8 +32,7 @@ class AuthHandler(BaseHandler):
         # verify user logged in
         
         if not userid:
-            self.set_status(403)
-            self.write_json({
+            self.write_json_with_status(403,{
                 'result' : 'fail',
                 'reason' : 'authantication failed'
                 })
@@ -100,8 +99,7 @@ class AuthHandler(BaseHandler):
     def user_logout(self, userid):
 
         if not userid:
-            self.set_status(403)
-            self.write_json({
+            self.write_json_with_status(403,{
                 'result' : 'fail',
                 'reason' : 'authantication failed'
                 })
