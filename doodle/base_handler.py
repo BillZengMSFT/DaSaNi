@@ -110,7 +110,7 @@ def async_login_required(fun):
     @gen.coroutine
     def __decorator(self, *args, **kw):
         userid = yield self.authorize_user()
-        if not user:
+        if not userid:
             self.write_json_with_status(403,{
                 'result' : 'fail',
                 'reason' : 'Authantication failed'

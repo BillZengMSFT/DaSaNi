@@ -5,6 +5,7 @@ from .config import *
 from tornado import gen
 from .base_handler import *
 from dynamo import User
+from boto.dynamodb.condition import *
 
 class AuthHandler(BaseHandler):
 
@@ -39,8 +40,13 @@ class AuthHandler(BaseHandler):
             return
 
         # log out other devices
-
-        yield self.user_logout(userid)
+        if userid in self.memcache:
+            yield self.user_logout(userid)
+        
+        # register device
+        apns = yield gen.maybe_future(self.user_apns_sns_table.get_item(client_data['apns']))
+        apns['UserID'] = userid
+        yield gen.maybe_future(apns.put())
 
         # split and subscribe user's topics
 
@@ -73,9 +79,12 @@ class AuthHandler(BaseHandler):
                 
                 topic_and_subid['TopicList'] = new_topic_list
 
+
+
         # set user memcache token
 
         token = User.create_token(userid, self.memcache)
+
 
         self.write_json({
             'result' : 'OK',
@@ -118,7 +127,6 @@ class AuthHandler(BaseHandler):
                 endpoint = endpoint_info['APNsToken']
                 
                 for topic_and_subid in topic_and_subid_list:
-                    #   TODO if gets error
                     subid = topic_and_subid.split('|')[1]
                     # optimistic continue
                     try:
@@ -127,6 +135,11 @@ class AuthHandler(BaseHandler):
                         print(e)
                         continue
         
+        # unregister device
+        apns_data = [u for u in self.user_apns_sns_table.scan({"UserID":EQ(userid)})][0]
+        apns_data['UserID'] = ';'
+        apns_data.put()
+
         # delete user memcache token
 
         del self.memcache[userid]
