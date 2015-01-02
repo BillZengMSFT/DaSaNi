@@ -59,7 +59,7 @@ class ChatgroupHandler(BaseHandler):
             'ChatgroupID'   : chatgroup_id,
             'EventID'       : event_id,
             'Name'          : client_data['name'],
-            'CreatorID'     : self.current_user,
+            'CreatorID'     : self.current_userid,
             'MemberList'    : client_data['memberlist'],
             'Capacity'      : client_data['capacity'],
             'PhotoID'       : client_data['photo'],
@@ -67,14 +67,16 @@ class ChatgroupHandler(BaseHandler):
             'SQS'           : sqs_arn,
             'Timestamp'     : timestamp
         }
+
+        print(attrs)
+
         item = self.chatgroup_table.new_item(
             hash_key=chatgroup_id,
-            range_key=None,
             attrs=attrs
         )
         item.put()
 
-        members = memberlist.split(';')
+        members = client_data['memberlist'].split(';')
         for member in members:
             self.__add_user_to_topic(member)
 

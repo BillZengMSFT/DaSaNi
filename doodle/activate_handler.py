@@ -56,19 +56,19 @@ class ActivateHandler(BaseHandler):
 
                 # create items in tables for the new account
                 new_user_topic_list= self.user_topic_table.new_item(
-                    hash_key=hashed_userid,
+                    hash_key=userid,
                     range_key=None,
                     attrs={"TopicList" : ";"}
                     )
 
                 new_user_friend_list= self.user_friend_table.new_item(
-                    hash_key=hashed_userid,
+                    hash_key=userid,
                     range_key=None,
                     attrs={"FriendList" : ";"}
                     )
 
                 new_user_event_list = self.user_event_table.new_item(
-                    hash_key=hashed_userid,
+                    hash_key=userid,
                     range_key=None,
                     attrs={"EventList" : ";"}
                     )
@@ -87,7 +87,13 @@ class ActivateHandler(BaseHandler):
                     'result' : 'fail',
                     'reason' : 'authantication failed'
                 })
-                return
+        
+        # user activator not exist
+        else:
+            self.write_json_with_status(400,{
+                'result' : 'fail',
+                'reason' : 'cannot find activator'
+            })
 
 
     @gen.coroutine
@@ -118,7 +124,6 @@ class ActivateHandler(BaseHandler):
                 'result' : 'fail',
                 'reason' : 'too many attempts recorded'
             })
-            return
         try:
             activate_code = send_email(
                 self.ses,
@@ -130,7 +135,6 @@ class ActivateHandler(BaseHandler):
                 'result' : 'fail',
                 'reason' : 'failed to send email'
             })
-            return
 
         # update dynamo
 

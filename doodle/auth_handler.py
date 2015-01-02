@@ -39,8 +39,8 @@ class AuthHandler(BaseHandler):
             return
 
         # log out other devices
-
-        yield self.user_logout(userid)
+        if userid in self.memcache:
+            yield self.user_logout(userid)
 
         # split and subscribe user's topics
 
