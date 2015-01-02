@@ -12,6 +12,7 @@ class ClientHandler(BaseHandler):
         return self.dynamo.get_table(USER_APNS_SNS_TABLE)
 
 
+    @gen.coroutine
     def add_sns_app_endpoint(self):
         client_data = self.data
         device_token = client_data['deviceToken']
@@ -26,13 +27,10 @@ class ClientHandler(BaseHandler):
         Create new sns subcription to App
     """
 
-    @async_login_required
     @gen.coroutine
     def post(self):
-        aws_endpoint_arn = self.add_sns_app_endpoint()
-        userid = self.current_userid
+        aws_endpoint_arn = yield self.add_sns_app_endpoint()
         attrs = {
-            'UserID'    : userid, 
             'APNsToken' : self.data['deviceToken'], 
             'SNSToken'  : aws_endpoint_arn
             }
@@ -40,7 +38,7 @@ class ClientHandler(BaseHandler):
             hash_key=userid,
             attrs=attrs
         )
-        item.put()
+        yield tornado.maybe_future(item.put())
 
 
 

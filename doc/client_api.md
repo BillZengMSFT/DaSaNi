@@ -4,7 +4,7 @@
 
     Register an iOS device to SNS App and store information to dynamo User_Apns_SNS_TABLE
 
-> post* : /api/v1/client/registry
+> post : /api/v1/client/registry
 
 ```
 PAYLOAD:
