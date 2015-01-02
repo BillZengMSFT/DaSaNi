@@ -14,6 +14,8 @@ PAYLOAD:
         'photo'         : 'a photo url',
         'start_time'    : 'start time, a unix timestamp',
         'end_time'      : 'end time, a unix timestamp',
+        'detail'        : 'optional detail about the event',
+        'location'      : 'optional location of the event'
     }
 
 RETURN:
