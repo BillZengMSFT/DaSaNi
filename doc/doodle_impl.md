@@ -1,5 +1,18 @@
 ```This doc elaborate implementation detail about what each API is doing and what client need to do as a whole system```
 
+##### Device Reigstry
+
+> Process
+
+```
+-> mobile open everytime register
+```
+
+> API Call
+
+```
+```
+
 ##### User Registry
 
 > Process
@@ -136,16 +149,28 @@ AuthHandler             : post /api/v1/auth/login
 > Process
 
 ```
--> 
+-> mobile comment an event
 ```
 
 > API Call
 
 ```
--> 
+-> CommentHandler       : post /api/v1/comment/create
 ```
 
 ##### Join An Event
+
+> Process
+
+```
+
+```
+
+> API Call
+
+```
+
+```
 
 ##### Share An Event
 
