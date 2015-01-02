@@ -86,16 +86,64 @@ AuthHandler             : post /api/v1/auth/login
 > API Call
 
 ```
--> 
+-> EventHandler         : get /api/v1/event/(event_id)/(timestamp)/(limit)
 ```
 
 ##### Create An Event
 
+> Process
+
+```
+-> mobile create a new event
+```
+
+> API Call
+
+```
+-> EventHandler         : post /api/v1/event/create
+```
+
 ##### Like An Event
+
+> Process
+
+```
+-> mobile like a event
+```
+
+> API Call
+
+```
+-> EventHandler         : put /api/v1/event/put
+```
 
 ##### View An Event
 
+> Process
+
+```
+-> mobile view an event
+```
+
+> API Call
+
+```
+-> EventHandler         : get /api/v1/event/(event_id)
+```
+
 ##### Comment An Event
+
+> Process
+
+```
+-> 
+```
+
+> API Call
+
+```
+-> 
+```
 
 ##### Join An Event
 
