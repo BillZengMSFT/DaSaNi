@@ -45,16 +45,23 @@ class ChatgroupHandler(BaseHandler):
 
         chatgroup_id = md5(self.current_userid+timestamp)
 
+        # create a new queue for chat
         sqs_response = self.sqs.create_queue(
             chatgroup_id
         )
         sqs_arn = sqs_response._arn()
 
+        # create a new topic for push
         sns_response = self.sns.create_topic(
             chatgroup_id
         )
         sns_arn = sns_response['CreateTopicResponse']['CreateTopicResult']['TopicArn']
 
+        # subscribe to topic 
+        user = self.user_apns_sns_table.get_item(self.current_userid)
+        subid = self.sns.subscribe(sns_arn, 'application', user['SNSToken'])
+
+        # create a chatgroup in table
         attrs = {
             'ChatgroupID'   : chatgroup_id,
             'EventID'       : event_id,
@@ -78,7 +85,7 @@ class ChatgroupHandler(BaseHandler):
 
         members = client_data['memberlist'].split(';')
         for member in members:
-            self.__add_user_to_topic(member)
+            self.__add_user_to_topic(member, sns_arn, subid)
 
         self.write_json({
             'chatgroup_id' : chatgroup_id,

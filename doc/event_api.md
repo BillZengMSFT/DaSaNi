@@ -32,7 +32,7 @@ PAYLOAD:
     {
         'type'              : 'application or invitation or leave or update',
         'choice'            : 'accept or deny',
-        'event_id'          : 'event to join',
+        'event_id'          : 'event to join / like',
         'inbox_message_id'  : 'spcific inbox message id, not required if type is update',
         'who_apply'         : 'optional user who apply for event, required for application',
         'who_invite'        : 'optional user who invite, required for invitation'
@@ -51,12 +51,16 @@ RETURN:
 ```
 
 > get : /api/v1/event/(event_id)
-        /api/v1/event/(event_id)/(timestamp)/(limit)
-    If timestamp and limit is present, then it's fetching a list of events.
-    Otherwise it's only fetching one event by its event id.
+
+> get : /api/v1/event/(event_id)/(timestamp)/(limit)
+
 
 ```
-    Return specific chatgroup info
+If timestamp and limit is present, then it's fetching a list of events.
+Otherwise it's only fetching one event by its event id.
+
+Return specific chatgroup info
+    
     {
         'EventID'       : event id,
         'Name'          : event name,
