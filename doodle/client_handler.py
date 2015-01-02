@@ -32,13 +32,17 @@ class ClientHandler(BaseHandler):
         aws_endpoint_arn = yield self.add_sns_app_endpoint()
         attrs = {
             'APNsToken' : self.data['deviceToken'], 
-            'SNSToken'  : aws_endpoint_arn
+            'SNSToken'  : aws_endpoint_arn,
+            'UserID'    : ';'
             }
         item = self.user_apns_sns_table.new_item(
-            hash_key=userid,
+            hash_key=self.data['deviceToken'],
             attrs=attrs
         )
-        yield tornado.maybe_future(item.put())
+        yield gen.maybe_future(item.put())
+        self.write_json({
+            'result' : 'ok'
+            })
 
 
 

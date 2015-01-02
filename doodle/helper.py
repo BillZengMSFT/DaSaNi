@@ -31,15 +31,20 @@ def hash_password(pwd):
 
 # regex
 def list_delete_item(to_remove_reg, list_string):
+    # filter out |
+    to_remove_reg = to_remove_reg.replace('|','\|')
     # handle empty string
     if list_string == '' or list_string == ';':
         return ';'
     # handle not found 
-    match = re.search(to_remove_string, list_string)
+    print(to_remove_reg,list_string)
+    match = re.search(to_remove_reg, list_string)
     if match == None:
         return list_string
     front, rear = list_string.split(match.group())
-    return front+rear
+    if front + rear == '':
+        return ';'
+    return front + rear
 
 # raw string
 def list_append_item(to_append_string, list_string):
