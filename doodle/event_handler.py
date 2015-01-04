@@ -52,8 +52,8 @@ class EventHandler(BaseHandler):
         attrs = {
             'EventID'       : event_id,
             'Name'          : client_data['name'],
-            'CreatorID'     : self.current_user,
-            'MemberList'    : client_data['memberlist'],
+            'CreatorID'     : self.current_userid,
+            'MemberList'    : ';',
             'LikeList'      : ';',
             'detail'        : detail,
             'location'      : location,
@@ -69,6 +69,10 @@ class EventHandler(BaseHandler):
             range_key = None,
             attrs = attrs
             )
+
+        current_user = self.user_event_table.get_item(self.current_userid)
+        current_user['EventList'] = list_append_item(event_id, current_user['EventList'])
+        current_user.put()
         new_event.put()
         self.write_json({
             'event_id' : event_id
@@ -82,9 +86,9 @@ class EventHandler(BaseHandler):
     def put(self):
         client_data = self.data
         request_type = client_data['type']
-        choice = client_data['choice']
+        choice = option_value(client_data,'choice')
         event_id = client_data['event_id']
-        inbox_id = client_data['inbox_message_id']
+        inbox_id = option_value(client_data,'inbox_message_id')
         if request_type == 'application':
             self.__event_application(client_data['who_apply'], event_id, self.current_userid, choice, inbox_message_id)
         elif request_type == 'invitation':
@@ -111,7 +115,7 @@ class EventHandler(BaseHandler):
                     })
             if re.search(who_apply, event['MemberList']) == None:
                 event['MemberList'] = list_append_item(event['MemberList'], who_apply)
-
+                event.put()
                 # delete inbox message
                 try:
                     inbox_message = self.user_inbox_table.get_item(inbox_message_id)
@@ -144,7 +148,7 @@ class EventHandler(BaseHandler):
                 'result' : 'fail',
                 'reason' : 'invalid event id'
                 })
-        if re.search(who_leave, event['MemberList']) != None:
+        if re.search(who_leave, event['MemberList']) != None and self.current_userid != event['CreatorID']:
             event['MemberList'] = list_delete_item(who_leave + ".*?;", event['MemberList'])
             event.put()
 
@@ -215,7 +219,7 @@ class EventHandler(BaseHandler):
                     'result' : 'fail',
                     'reason' : 'invalid event id'
                     })
-            for key, val in event.itmes():
+            for key, val in event.items():
                 response[key] = val
             self.write_json(response)
         else:
