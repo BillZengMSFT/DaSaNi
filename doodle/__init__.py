@@ -5,4 +5,6 @@ from .auth_handler import AuthHandler
 from .friend_handler import FriendHandler
 from .inbox_handler import InboxHandler
 from .chatgroup_handler import ChatgroupHandler
+from .comment_handler import CommentHandler
+from .event_handler import EventHandler
 from .config import *

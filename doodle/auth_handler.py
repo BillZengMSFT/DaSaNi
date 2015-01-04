@@ -41,7 +41,7 @@ class AuthHandler(BaseHandler):
 
         # log out other devices
         if userid in self.memcache:
-            yield self.user_logout(userid)
+            yield self.user_logout(userid,client_data)
         
         # register device
         apns = yield gen.maybe_future(self.user_apns_sns_table.get_item(client_data['apns']))
@@ -52,8 +52,8 @@ class AuthHandler(BaseHandler):
 
         if self.user_topic_table.has_item(userid):
             
-            topic_and_subid = self.user_topic_table.get_item(userid)
-            topic_and_subid_string = topic_and_subid['TopicList']
+            topic_and_subid_item = self.user_topic_table.get_item(userid)
+            topic_and_subid_string = topic_and_subid_item['TopicList']
             
             topic_and_subid_list = topic_and_subid_string.split(';')
             topic_and_subid_list = topic_and_subid_string.split(';')
@@ -77,7 +77,7 @@ class AuthHandler(BaseHandler):
                         print(e)
                         continue
                 
-                topic_and_subid['TopicList'] = new_topic_list
+                topic_and_subid_item['TopicList'] = new_topic_list
 
 
 
@@ -105,7 +105,7 @@ class AuthHandler(BaseHandler):
 
 
     @gen.coroutine
-    def user_logout(self, userid):
+    def user_logout(self, userid, client_data):
 
         if not userid:
             self.write_json_with_status(403,{
@@ -121,19 +121,19 @@ class AuthHandler(BaseHandler):
             topic_and_subid = self.user_topic_table.get_item(userid)
             topic_and_subid_string = topic_and_subid['TopicList']
             topic_and_subid_list = topic_and_subid_string.split(';')
-
+            print(topic_and_subid_list)
             if not (len(topic_and_subid_list) == 2 and topic_and_subid_list[0] == ''):
                 endpoint_info =  self.user_apns_sns_table.get_item(client_data['apns'])
                 endpoint = endpoint_info['APNsToken']
-                
                 for topic_and_subid in topic_and_subid_list:
-                    subid = topic_and_subid.split('|')[1]
-                    # optimistic continue
-                    try:
-                        self.sns.unsubscribe(subid)
-                    except Exception as e:
-                        print(e)
-                        continue
+                    if topic_and_subid != '':
+                        subid = topic_and_subid.split('|')[1]
+                        # optimistic continue
+                        try:
+                            self.sns.unsubscribe(subid)
+                        except Exception as e:
+                            print(e)
+                            continue
         
         # unregister device
         apns_data = [u for u in self.user_apns_sns_table.scan({"UserID":EQ(userid)})][0]
