@@ -213,7 +213,7 @@ def main():
     application = get_app()
     tornado.options.parse_command_line()
     server = HTTPServer(application)#, ssl_options=get_ssl())
-    server.listen(int(os.environ.get("PORT", 5000)))
+    server.listen(80)
     ioloop = get_ioloop()
     try:
         ioloop.start()
