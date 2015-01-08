@@ -1,3 +1,4 @@
+python >= 3.4
 virtualenv
 tornado >= 4.0
 redis
