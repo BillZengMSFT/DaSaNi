@@ -37,6 +37,7 @@ Model Fields:
 
         {
             "email"     : "address must end with .edu",
+            "password"  : "a serious user password",
             "firstname" : "first name",
             "lastname"  : "last name",
         }

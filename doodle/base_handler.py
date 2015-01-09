@@ -74,7 +74,6 @@ class BaseHandler(tornado.web.RequestHandler):
                 hash_password(pwd_or_userid),
                 self.dynamo)
 
-        
 
         if user:
             return user
