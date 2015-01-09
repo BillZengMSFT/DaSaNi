@@ -99,6 +99,7 @@ class BaseHandler(tornado.web.RequestHandler):
     def write_json_with_status(self, status, data):
         self.set_status(status)
         self.write_json(data)
+        self.finish()
 
 
 """ Apply for asynchronous call
