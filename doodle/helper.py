@@ -4,7 +4,6 @@ import hashlib
 import time
 import re
 from .config import ACTIVATOR_EMAILADDRESS
-from werkzeug.security import generate_password_hash
 
 
 def send_email(ses, email, fn, ln):
@@ -23,11 +22,6 @@ def md5(s):
     m = hashlib.md5()
     m.update(s.encode("utf-8"))
     return m.hexdigest()
-
-
-def hash_password(pwd):
-    return generate_password_hash(pwd).split(":")[0]
-
 
 # regex
 def list_delete_item(to_remove_reg, list_string):
