@@ -34,22 +34,25 @@ class BaseHandler(tornado.web.RequestHandler):
     def data(self):
         return json.loads(self.request.body.decode('utf-8'))
 
-    """ TODO For Every Handler
+    """ 
+        TODO For Every Handler
         filter out every input dictionary
     """
 
     def input_firewall(input_dict):
         pass
 
-    """ TODO For Every Handler
+    """ 
+        TODO For Every Handler
         filter out every output dictionary
     """
 
     def output_firewall(input_dict):
         pass
 
-    """ User token authorization
-            user here is user id
+    """ 
+        User token authorization
+        user here is user id
     """
 
     @gen.coroutine
@@ -81,7 +84,8 @@ class BaseHandler(tornado.web.RequestHandler):
             return None
 
 
-    """ Helper Function
+    """ 
+        Helper Function
 
     """ 
 
@@ -102,7 +106,8 @@ class BaseHandler(tornado.web.RequestHandler):
         self.finish()
 
 
-""" Apply for asynchronous call
+""" 
+    Apply for asynchronous call
 """
 
 def async_login_required(fun):
@@ -121,8 +126,8 @@ def async_login_required(fun):
 
     return __decorator
 
-""" Apply for synchronous call
-
+""" 
+    Apply for synchronous call
 """
 
 def login_required(fun):

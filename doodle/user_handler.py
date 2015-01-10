@@ -54,6 +54,7 @@ class UserHandler(BaseHandler):
             "FirstName"     : self.data['firstname'],
             "LastName"      : self.data['lastname'],
             "AccountActive" : False,
+            "Password"      : hashed_password,
         }
         # Create new user item and upload it to database
         new_user = self.user_table.new_item(
