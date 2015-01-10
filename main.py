@@ -2,6 +2,7 @@
 #   
 # web server main app
 
+import os
 import tornado.ioloop
 import tornado.web
 import tornado.options

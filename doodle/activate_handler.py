@@ -129,7 +129,8 @@ class ActivateHandler(BaseHandler):
                 self.ses,
                 user_data['Email'],
                 user_data['Firstname'],
-                user_data['Lastname'])
+                user_data['Lastname']
+                )
         except:
             self.write_json({
                 'result' : 'fail',

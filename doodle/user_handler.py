@@ -28,7 +28,7 @@ class UserHandler(BaseHandler):
 
         # Get email from client and hash it
 
-        password = self.data['password']
+        # password = self.data['password']
         email = self.data['email'].strip()
 
         hashed_userid = md5(email)
@@ -45,7 +45,7 @@ class UserHandler(BaseHandler):
                 'reason' : 'email already used'
                 })
 
-        hashed_password = hash_password(password)
+        # hashed_password = hash_password(password)
         
         # Build attrs for the new user
 
@@ -54,6 +54,7 @@ class UserHandler(BaseHandler):
             "FirstName"     : self.data['firstname'],
             "LastName"      : self.data['lastname'],
             "AccountActive" : False,
+            # "Password"      : hashed_password,
         }
         # Create new user item and upload it to database
         new_user = self.user_table.new_item(
@@ -105,6 +106,15 @@ class UserHandler(BaseHandler):
     def put(self):
         self.input_firewall(self.data)
         user = self.user_table.get_item(self.current_userid)
+        try:
+            # if we are updating password, hash it
+            if self.data['password']:
+                self.data['password'] = hash_password(self.data['password'])
+        except:
+            pass
+        for key, value in self.data.items():
+            if not self.data[key]:
+                self.data[key] = ';'
         user.update(self.data)
         user.put()
         self.write_json({'result': 'OK'})
