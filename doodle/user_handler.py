@@ -112,6 +112,9 @@ class UserHandler(BaseHandler):
                 self.data['password'] = hash_password(self.data['password'])
         except:
             pass
+        for key, value in self.data.items():
+            if not self.data[key]:
+                self.data[key] = ';'
         user.update(self.data)
         user.put()
         self.write_json({'result': 'OK'})
