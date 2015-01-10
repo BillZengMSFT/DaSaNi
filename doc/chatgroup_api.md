@@ -23,7 +23,7 @@ RETURN:
     }
 ```
     
-    Accept or reject application or invitation / leave a chatgroup
+    Accept or reject application or invitation / leave a chatgroup / edit chatgroup
 
 > put* : /api/v1/chatgroup/put
 
@@ -43,6 +43,10 @@ PAYLOAD:
     }
 
 RETURN:
+    edit chatgroup
+    {
+        ''
+    }
     application / invitation
     {
         'sqs'       : 'sqs_arn'

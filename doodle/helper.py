@@ -24,10 +24,8 @@ def md5(s):
     m.update(s.encode("utf-8"))
     return m.hexdigest()
 
-
 def hash_password(pwd):
     return generate_password_hash(pwd).split(":")[0]
-
 
 # regex
 def list_delete_item(to_remove_reg, list_string):

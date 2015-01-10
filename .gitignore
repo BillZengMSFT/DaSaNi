@@ -1,4 +1,6 @@
 # Byte-compiled / optimized / DLL files
+py3env
+Python-3.4.1
 __pycache__/
 *.py[cod]
 *.pyc

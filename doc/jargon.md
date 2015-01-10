@@ -89,6 +89,17 @@ PINE_TABLE = "Pine_Table"
 #### Snippets
 
 ```
+Authorization 
+header : Authorization
+
+example : 
+Authorization: Basic email_or_token:password_or_userid
+
+memcache : userid -> token
+
+```
+
+```
 Bool in dynamo is stored as Number, so NEVER use:```
 Bad  : some_var is True
 Good : some_var == True
