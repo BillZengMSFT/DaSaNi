@@ -8,11 +8,140 @@ from .config import *
 from .helper import *
 
 class PasswordHandler(BaseHandler):
+    @property
+    def user_table(self):
+        return self.dynamo.get_table(USER_TABLE)
 
-	@async_login_required
-	@gen.coroutine
-	def post():
-		pass
+    @property
+    def user_activate_table(self):
+        return self.dynamo.get_table(USER_ACTIVATE_TABLE)
 
-	def get(userid, code):
-		pass
+    @gen.coroutine
+    def post():
+        """
+            send an activate code to user's email and make an record in User_Activate_Table
+            PAYLOAD:
+            {
+                "userid":"a serious user id"
+            }
+        """
+        client_data = self.data
+        userid = client_data['userid']
+        try:
+            # fetch user data from dynamodb
+            user = yield gen.maybe_future(self.user_table.get_item(userid))
+        except:
+            self.write_json_with_status(400,{
+                'result' : 'fail',
+                'reason' : 'invalid userid'
+            })
+        try:
+            # generate activate code and send email
+            activate_code = yield gen.maybe_future(
+                send_email(
+                    self.ses,
+                    user["Email"],
+                    user["FirstName"],
+                    user["LastName"]
+                )
+            )
+        except:
+            # process exception
+            self.write_json_with_status(400,{
+                'result' : 'fail',
+                'reason' : 'failed to send email'
+            })
+
+        activator_attrs = {
+            "Timestamp" : str(time.time()).split(".")[0],
+            "Code"      : activate_code,
+            "Attempt"   : 1
+        }
+        
+        # save activator code to dynamodb
+        new_user_activator = self.user_activate_table.new_item(
+            hash_key=userid,
+            range_key=None,
+            attrs=activator_attrs
+            )
+
+        yield gen.maybe_future(new_user_activator.put())
+
+        self.write_json({
+            'result': 'ok',
+        })
+
+    @gen.coroutine
+    def get(userid, code):
+        """
+            verify code from client
+        """
+        try:
+            activator = yield gen.maybe_future(self.user_activate_table.get_item(userid))
+        except:
+            self.write_json_with_status(400,{
+                'result' : 'fail',
+                'reason' : 'invalid userid'
+            })
+        if code == activator["Code"]:
+            self.write_json({
+            'result': 'ok',
+            })
+        else:
+            # wrong code
+            self.write_json_with_status(403,{
+                'result' : 'fail',
+                'reason' : 'authantication failed'
+            })
+
+    @gen.coroutine
+    def put():
+        """
+            resend email.
+            PAYLOAD:
+            {
+                "userid": "a serious user id"
+            }
+        """
+        try:
+            activator = yield gen.maybe_future(self.user_activate_table.get_item(userid))
+            user = yield gen.maybe_future(self.user_table.get_item(userid))
+        except:
+            self.write_json_with_status(400,{
+                'result' : 'fail',
+                'reason' : 'invalid userid'
+            })
+
+        # increment on counter
+        activator['Attempt'] = activator['Attempt'] + 1
+        if activator['Attempt'] > 3:
+            # no more than 3 emails per day per user
+            self.write_json({
+                'result' : 'fail',
+                'reason' : 'too many attempts recorded'
+            })
+
+        try:
+            # generate a new activate code and send email
+            activate_code = yield gen.maybe_future(
+                send_email(
+                    self.ses,
+                    user["Email"],
+                    user["FirstName"],
+                    user["LastName"]
+                )
+            )
+        except:
+            # process exception
+            self.write_json_with_status(400,{
+                'result' : 'fail',
+                'reason' : 'failed to send email'
+            })
+
+        activator['Code'] = activate_code
+
+        yield gen.maybe_future(activator.put())
+
+        self.write_json({
+            'result':'ok'
+        })
