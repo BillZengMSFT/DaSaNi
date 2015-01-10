@@ -28,7 +28,7 @@ class UserHandler(BaseHandler):
 
         # Get email from client and hash it
 
-        # password = self.data['password']
+        password = self.data['password']
         email = self.data['email'].strip()
 
         hashed_userid = md5(email)
@@ -47,7 +47,7 @@ class UserHandler(BaseHandler):
 
             return
 
-        # hashed_password = hash_password(password)
+        hashed_password = hash_password(password)
         
         # Build attrs for the new user
 
@@ -56,7 +56,7 @@ class UserHandler(BaseHandler):
             "FirstName"     : self.data['firstname'],
             "LastName"      : self.data['lastname'],
             "AccountActive" : False,
-            # "Password"      : hashed_password,
+            "Password"      : hashed_password,
         }
         # Create new user item and upload it to database
         new_user = self.user_table.new_item(
