@@ -45,6 +45,8 @@ class UserHandler(BaseHandler):
                 'reason' : 'email already used'
                 })
 
+            return
+
         # hashed_password = hash_password(password)
         
         # Build attrs for the new user

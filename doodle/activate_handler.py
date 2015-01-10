@@ -92,7 +92,7 @@ class ActivateHandler(BaseHandler):
         else:
             self.write_json_with_status(400,{
                 'result' : 'fail',
-                'reason' : 'cannot find activator'
+                'reason' : 'wrong activate code'
             })
 
 
