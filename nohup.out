@@ -1,0 +1,114 @@
+Traceback (most recent call last):
+  File "main.py", line 226, in <module>
+    main()
+  File "main.py", line 215, in main
+    server.listen(80)
+  File "/usr/local/lib/python3.4/site-packages/tornado/tcpserver.py", line 125, in listen
+    sockets = bind_sockets(port, address=address)
+  File "/usr/local/lib/python3.4/site-packages/tornado/netutil.py", line 145, in bind_sockets
+    sock.bind(sockaddr)
+PermissionError: [Errno 13] Permission denied
+Traceback (most recent call last):
+  File "main.py", line 226, in <module>
+    main()
+  File "main.py", line 215, in main
+    server.listen(80)
+  File "/usr/local/lib/python3.4/site-packages/tornado/tcpserver.py", line 125, in listen
+    sockets = bind_sockets(port, address=address)
+  File "/usr/local/lib/python3.4/site-packages/tornado/netutil.py", line 145, in bind_sockets
+    sock.bind(sockaddr)
+PermissionError: [Errno 13] Permission denied
+Traceback (most recent call last):
+  File "main.py", line 226, in <module>
+    main()
+  File "main.py", line 215, in main
+    server.listen(80)
+  File "/usr/local/lib/python3.4/site-packages/tornado/tcpserver.py", line 125, in listen
+    sockets = bind_sockets(port, address=address)
+  File "/usr/local/lib/python3.4/site-packages/tornado/netutil.py", line 145, in bind_sockets
+    sock.bind(sockaddr)
+PermissionError: [Errno 13] Permission denied
+[W 150109 20:42:36 web:1811] 400 POST /api/v1/user/create (71.11.104.20) 61.77ms
+[E 150109 20:42:36 web:1407] Uncaught exception POST /api/v1/user/create (71.11.104.20)
+    HTTPServerRequest(protocol='http', host='ec2-50-112-138-67.us-west-2.compute.amazonaws.com', method='POST', uri='/api/v1/user/create', version='HTTP/1.1', remote_ip='71.11.104.20', headers={'Accept': '*/*', 'Accept-Language': 'en;q=1.0,zh-Hans;q=0.9', 'Content-Type': 'application/json', 'Content-Length': '80', 'Host': 'ec2-50-112-138-67.us-west-2.compute.amazonaws.com', 'Accept-Encoding': 'gzip;q=1.0,compress;q=0.5', 'User-Agent': 'Carlor/com.mini.Carlor (1; OS Version 8.1.2 (Build 12B440))', 'Connection': 'keep-alive'})
+    Traceback (most recent call last):
+      File "/usr/local/lib/python3.4/site-packages/tornado/web.py", line 1334, in _execute
+        result = yield result
+      File "/usr/local/lib/python3.4/site-packages/tornado/gen.py", line 628, in run
+        value = future.result()
+      File "/usr/local/lib/python3.4/site-packages/tornado/concurrent.py", line 109, in result
+        raise_exc_info(self._exc_info)
+      File "<string>", line 3, in raise_exc_info
+      File "/usr/local/lib/python3.4/site-packages/tornado/gen.py", line 633, in run
+        yielded = self.gen.send(value)
+      File "/home/ubuntu/DaSaNi/doodle/user_handler.py", line 45, in post
+        'reason' : 'email already used'
+      File "/home/ubuntu/DaSaNi/doodle/base_handler.py", line 102, in write_json_with_status
+        self.finish()
+      File "/usr/local/lib/python3.4/site-packages/tornado/web.py", line 864, in finish
+        raise RuntimeError("finish() called twice.  May be caused "
+    RuntimeError: finish() called twice.  May be caused by using async operations without the @asynchronous decorator.
+[W 150109 20:59:35 web:1811] 404 GET /etc/lib/pChart2/examples/imageMap/index.php (5.196.5.203) 0.56ms
+[W 150110 02:40:45 web:1811] 400 POST /api/v1/user/create (107.77.87.25) 50.05ms
+[E 150110 02:40:45 web:1407] Uncaught exception POST /api/v1/user/create (107.77.87.25)
+    HTTPServerRequest(protocol='http', host='ec2-50-112-138-67.us-west-2.compute.amazonaws.com', method='POST', uri='/api/v1/user/create', version='HTTP/1.1', remote_ip='107.77.87.25', headers={'Accept': '*/*', 'Accept-Language': 'en;q=1.0,zh-Hans;q=0.9', 'Content-Type': 'application/json', 'Content-Length': '80', 'Host': 'ec2-50-112-138-67.us-west-2.compute.amazonaws.com', 'Accept-Encoding': 'gzip;q=1.0,compress;q=0.5', 'User-Agent': 'Carlor/com.mini.Carlor (1; OS Version 8.1.2 (Build 12B440))', 'Connection': 'keep-alive', 'Via': 'HTTP/1.1 chcnz03msp1ts06.wnsnet.attws.com'})
+    Traceback (most recent call last):
+      File "/usr/local/lib/python3.4/site-packages/tornado/web.py", line 1334, in _execute
+        result = yield result
+      File "/usr/local/lib/python3.4/site-packages/tornado/gen.py", line 628, in run
+        value = future.result()
+      File "/usr/local/lib/python3.4/site-packages/tornado/concurrent.py", line 109, in result
+        raise_exc_info(self._exc_info)
+      File "<string>", line 3, in raise_exc_info
+      File "/usr/local/lib/python3.4/site-packages/tornado/gen.py", line 633, in run
+        yielded = self.gen.send(value)
+      File "/home/ubuntu/DaSaNi/doodle/user_handler.py", line 45, in post
+        'reason' : 'email already used'
+      File "/home/ubuntu/DaSaNi/doodle/base_handler.py", line 102, in write_json_with_status
+        self.finish()
+      File "/usr/local/lib/python3.4/site-packages/tornado/web.py", line 864, in finish
+        raise RuntimeError("finish() called twice.  May be caused "
+    RuntimeError: finish() called twice.  May be caused by using async operations without the @asynchronous decorator.
+[I 150110 02:44:30 web:1811] 200 POST /api/v1/user/create (107.77.87.25) 549.27ms
+[I 150110 02:52:17 web:1811] 200 POST /api/v1/user/create (107.77.87.25) 359.87ms
+[W 150110 02:53:07 web:1811] 400 POST /api/v1/user/create (107.77.87.25) 39.03ms
+[E 150110 02:53:07 web:1407] Uncaught exception POST /api/v1/user/create (107.77.87.25)
+    HTTPServerRequest(protocol='http', host='ec2-50-112-138-67.us-west-2.compute.amazonaws.com', method='POST', uri='/api/v1/user/create', version='HTTP/1.1', remote_ip='107.77.87.25', headers={'Accept': '*/*', 'Accept-Language': 'en;q=1.0,zh-Hans;q=0.9', 'Content-Type': 'application/json', 'Content-Length': '80', 'Host': 'ec2-50-112-138-67.us-west-2.compute.amazonaws.com', 'Accept-Encoding': 'gzip;q=1.0,compress;q=0.5', 'User-Agent': 'Carlor/com.mini.Carlor (1; OS Version 8.1.2 (Build 12B440))', 'Connection': 'keep-alive', 'Via': 'HTTP/1.1 chcnz03msp1ts06.wnsnet.attws.com'})
+    Traceback (most recent call last):
+      File "/usr/local/lib/python3.4/site-packages/tornado/web.py", line 1334, in _execute
+        result = yield result
+      File "/usr/local/lib/python3.4/site-packages/tornado/gen.py", line 628, in run
+        value = future.result()
+      File "/usr/local/lib/python3.4/site-packages/tornado/concurrent.py", line 109, in result
+        raise_exc_info(self._exc_info)
+      File "<string>", line 3, in raise_exc_info
+      File "/usr/local/lib/python3.4/site-packages/tornado/gen.py", line 633, in run
+        yielded = self.gen.send(value)
+      File "/home/ubuntu/DaSaNi/doodle/user_handler.py", line 45, in post
+        'reason' : 'email already used'
+      File "/home/ubuntu/DaSaNi/doodle/base_handler.py", line 102, in write_json_with_status
+        self.finish()
+      File "/usr/local/lib/python3.4/site-packages/tornado/web.py", line 864, in finish
+        raise RuntimeError("finish() called twice.  May be caused "
+    RuntimeError: finish() called twice.  May be caused by using async operations without the @asynchronous decorator.
+[W 150110 03:06:05 web:1811] 400 POST /api/v1/user/create (107.77.87.25) 54.74ms
+[E 150110 03:06:05 web:1407] Uncaught exception POST /api/v1/user/create (107.77.87.25)
+    HTTPServerRequest(protocol='http', host='ec2-50-112-138-67.us-west-2.compute.amazonaws.com', method='POST', uri='/api/v1/user/create', version='HTTP/1.1', remote_ip='107.77.87.25', headers={'Accept': '*/*', 'Accept-Language': 'en;q=1.0,zh-Hans;q=0.9', 'Content-Type': 'application/json', 'Content-Length': '80', 'Host': 'ec2-50-112-138-67.us-west-2.compute.amazonaws.com', 'Accept-Encoding': 'gzip;q=1.0,compress;q=0.5', 'User-Agent': 'Carlor/com.mini.Carlor (1; OS Version 8.1.2 (Build 12B440))', 'Connection': 'keep-alive', 'Via': 'HTTP/1.1 chcnz03msp1ts06.wnsnet.attws.com'})
+    Traceback (most recent call last):
+      File "/usr/local/lib/python3.4/site-packages/tornado/web.py", line 1334, in _execute
+        result = yield result
+      File "/usr/local/lib/python3.4/site-packages/tornado/gen.py", line 628, in run
+        value = future.result()
+      File "/usr/local/lib/python3.4/site-packages/tornado/concurrent.py", line 109, in result
+        raise_exc_info(self._exc_info)
+      File "<string>", line 3, in raise_exc_info
+      File "/usr/local/lib/python3.4/site-packages/tornado/gen.py", line 633, in run
+        yielded = self.gen.send(value)
+      File "/home/ubuntu/DaSaNi/doodle/user_handler.py", line 45, in post
+        'reason' : 'email already used'
+      File "/home/ubuntu/DaSaNi/doodle/base_handler.py", line 102, in write_json_with_status
+        self.finish()
+      File "/usr/local/lib/python3.4/site-packages/tornado/web.py", line 864, in finish
+        raise RuntimeError("finish() called twice.  May be caused "
+    RuntimeError: finish() called twice.  May be caused by using async operations without the @asynchronous decorator.
+[I 150110 03:06:05 web:1811] 200 POST /api/v1/user/activate (107.77.87.25) 273.44ms
