@@ -113,7 +113,7 @@ class UserHandler(BaseHandler):
         except:
             pass
         for key, value in self.data.items():
-            if not self.data[key] and not self.data[key] == 0 and not self.data[key] == False:
+            if not self.data[key]:
                 self.data[key] = ';'
         user.update(self.data)
         user.put()

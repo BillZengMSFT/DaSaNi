@@ -18,13 +18,13 @@ Model Fields:
     Phone          = str
     School         = str        Indexed
     Major          = str        Indexed
-    Gender         = Number   male => true  Indexed
+    Gender         = str   male/female  Indexed
     Signature      = str
-    Driver         = bool       Indexed
+    Driver         = str   yes/no    Indexed
     EmailActive    = bool
     PhoneActive    = bool
     AccountActive  = bool
-    DriverLicense  = str
+    DriverLicense  = str   
     CarID          = str        None
     PhotoID        = str        None
 
