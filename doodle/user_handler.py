@@ -125,8 +125,9 @@ class UserHandler(BaseHandler):
     # get user information
     @async_login_required
     @gen.coroutine
-    def get(self):
-        userid = self.current_userid
+    def get(self, userid=''):
+        if userid == '':
+            userid = self.current_userid
         user = self.user_table.get_item(userid)
         # filter output information
         user_data = self.output_firewall(user)
