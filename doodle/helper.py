@@ -99,7 +99,7 @@ def client_name_filter(attrs):
     }
     try:
         new_attrs = {}
-        for key, value in attr.items():
+        for key, value in attrs.items():
             if key in name_map:
                 new_attrs[name_map[key]] = value
             else:
