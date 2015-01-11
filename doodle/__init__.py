@@ -7,4 +7,5 @@ from .inbox_handler import InboxHandler
 from .chatgroup_handler import ChatgroupHandler
 from .comment_handler import CommentHandler
 from .event_handler import EventHandler
+from .password_handler import PasswordHandler
 from .config import *

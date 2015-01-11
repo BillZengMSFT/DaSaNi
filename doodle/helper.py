@@ -62,4 +62,51 @@ def option_value(_dict, key):
         return _dict[key]
     return ';'
 
+def client_name_filter(attrs):
+    # convert client data names to database names
+    name_map = {
+        'userid'        : 'UserID',
+        'code'          : 'Code',
+        'email'         : 'Email',
+        'name'          : 'Name',
+        'memberlist'    : 'MemberList',
+        'capacity'      : 'Capacity',
+        'photo'         : 'PhotoID',
+        'car_id'        : 'CarID',
+        'fisrtname'     : 'FirstName',
+        'lastname'      : 'LastName',
+        "gender"        : "Gender",
+        "college"       : "College",
+        "major"         : "Major",
+        "birthday"      : "Birthday",
+        "password"      : "Password",
+        "phone"         : "Phone",
+        "signature"     : "Signature",
+        "driver"        : "Driver",
+        "license"       : "DriverLicense",
+        'start_time'    : 'StartTime',
+        'end_time'      : 'EndTime',
+        'apn'           : 'APNs',
+        'sqs'           : 'SQS',
+        'ses'           : 'SES',
+        'deviceToken'   : 'APNsToken',
+        'event_id'      : 'EventID',
+        'chatgroup_id'  : 'ChatgroupID',
+        'creator_id'    : 'CreatorID',
+        'content'       : 'Content',
+        'comment_id'    : 'CommentID',
+        'payload'       : 'JsonMessage',
+    }
+    try:
+        new_attrs = {}
+        for key, value in attr.items():
+            if key in name_map:
+                new_attrs[name_map[key]] = value
+            else:
+                print("Wrong key in the input attrs.")
+                continue
+        return new_attrs
+    except:
+        print('attrs is not a dict!')
+
 

@@ -63,8 +63,8 @@ PINE_TABLE = "Pine_Table"
 
 ```
 	{
-		"user_id" : "12345",
-		"group_id" : "whyyousodiao"
+		"userid" : "12345",
+		"groupid" : "whyyousodiao"
 	}
 ```
 

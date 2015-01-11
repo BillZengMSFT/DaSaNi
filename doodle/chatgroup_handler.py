@@ -270,7 +270,7 @@ class ChatgroupHandler(BaseHandler):
                 'result' : 'fail',
                 'reason' : 'invalid chatgroup id'
             })
-        chatgroup.update(attrs)
+        chatgroup.update(client_name_filter(attrs))
         chatgroup.put()
         self.write_json({'result' : 'OK'})
 

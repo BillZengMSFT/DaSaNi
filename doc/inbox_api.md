@@ -10,7 +10,7 @@
 PAYLOAD:
 
         {
-            "target"    :   "a serious user id"
+            "target_user_id"    :   "a serious user id"
             "payload"   :   "Json information"
         }
 ```

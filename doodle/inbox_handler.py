@@ -18,7 +18,7 @@ class InboxHandler(BaseHandler):
     @gen.coroutine
     def post(self):
         client_data = self.data
-        target_user_id = client_data['target']
+        target_user_id = client_data['target_user_id']
         payload = client_data['payload']
         timestamp = str(time.time()).split('.')[0]
         hash_key = md5(payload+timestamp)

@@ -52,14 +52,14 @@ Model Fields:
         {
             "firstname" : "first name",
             "lastname"  : "last name",
-            "gender"    : "a serious bool, true for man",
+            "gender"    : "man/woman",
             "college"   : "school name",
             "major"     : "a serious major",
             "birthday"  : "an unix timestamp",
             "password"  : "a new password",
             "phone"     : "a XXX-XXX-XXXX style phone number",
             "signature" : "about user himself",
-            "driver"    : "a serious bool",
+            "driver"    : "yes/no",
             "license"   : "last 4 digits of driver license"
         }
 
