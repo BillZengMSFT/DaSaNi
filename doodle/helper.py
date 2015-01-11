@@ -103,7 +103,7 @@ def client_name_filter(attrs):
             if key in name_map:
                 new_attrs[name_map[key]] = value
             else:
-                print("Wrong key in the input attrs.")
+                print("Wrong key in the input attrs. Key: "+key+" Value: "+value)
                 continue
         return new_attrs
     except:
