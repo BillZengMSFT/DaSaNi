@@ -136,9 +136,11 @@ class AuthHandler(BaseHandler):
                             continue
         
         # unregister device
-        apns_data = [u for u in self.user_apns_sns_table.scan({"UserID":EQ(userid)})][0]
-        apns_data['UserID'] = ';'
-        apns_data.put()
+        apns_data = [u for u in self.user_apns_sns_table.scan({"UserID":EQ(userid)})]
+        if len(apns_data) > 0:
+            apns_data = apns_data[0]
+            apns_data['UserID'] = ';'
+            apns_data.put()
 
         # delete user memcache token
 
