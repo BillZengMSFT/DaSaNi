@@ -121,7 +121,6 @@ class AuthHandler(BaseHandler):
             topic_and_subid = self.user_topic_table.get_item(userid)
             topic_and_subid_string = topic_and_subid['TopicList']
             topic_and_subid_list = topic_and_subid_string.split(';')
-            print(topic_and_subid_list)
             if not (len(topic_and_subid_list) == 2 and topic_and_subid_list[0] == ''):
                 endpoint_info =  self.user_apns_sns_table.get_item(client_data['apns'])
                 endpoint = endpoint_info['APNsToken']

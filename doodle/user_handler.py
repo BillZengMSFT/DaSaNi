@@ -205,7 +205,7 @@ class UserHandler(BaseHandler):
         ]
 
         filtered_output = {}
-        for key, val in output_dict:
+        for key, val in output_dict.items():
             if key in legal_field_names:
                 filtered_output[key] = val
 
