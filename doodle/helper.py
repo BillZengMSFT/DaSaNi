@@ -73,7 +73,7 @@ def client_name_filter(attrs):
         'capacity'      : 'Capacity',
         'photo'         : 'PhotoID',
         'car_id'        : 'CarID',
-        'fisrtname'     : 'FirstName',
+        'firstname'     : 'FirstName',
         'lastname'      : 'LastName',
         "gender"        : "Gender",
         "college"       : "College",
