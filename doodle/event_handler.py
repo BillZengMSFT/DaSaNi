@@ -174,7 +174,7 @@ class EventHandler(BaseHandler):
                 'result' : 'fail',
                 'reason' : 'invalid event id'
             })
-        event.update(attrs)
+        event.update(client_name_filter(attrs))
         event.put()
         self.write_json({'result' : 'OK'})
 
@@ -280,8 +280,8 @@ class EventHandler(BaseHandler):
             'name',
             'capacity',
             'photo',
-            'start_time',
-            'end_time',
+            'starttime',
+            'endtime',
         ]
 
         for key, val in input_dict.items():
@@ -310,7 +310,6 @@ class EventHandler(BaseHandler):
 
     def output_firewall(self,output_dict):
         legal_field_names = [
-            'event_id',
             'EventID',
             'Name',
             'CreatorID',

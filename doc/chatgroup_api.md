@@ -9,7 +9,7 @@
 ```
 PAYLOAD:
     {
-        'eventid'       : 'optional an event id',
+        'event_id'       : 'optional an event id',
         'name'          : 'a chatgroup name',
         'memberlist'    : 'userid_0;userid_1;...',
         'capacity'      : 'a number of capacity',

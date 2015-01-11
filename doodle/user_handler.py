@@ -117,7 +117,7 @@ class UserHandler(BaseHandler):
         for key, value in self.data.items():
             if not self.data[key]:
                 self.data[key] = ';'
-        user.update(self.data)
+        user.update(client_name_filter(self.data))
         user.put()
         self.write_json({'result': 'OK'})
 
