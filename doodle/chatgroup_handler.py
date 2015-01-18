@@ -44,7 +44,7 @@ class ChatgroupHandler(BaseHandler):
 
         timestamp = str(time.time()).split('.')[0]
 
-        chatgroup_id = md5(self.current_userid+timestamp)
+        chatgroup_id = md5(self.current_userid + timestamp)
 
         # create a new queue for chat
         sqs_response = self.sqs.create_queue(

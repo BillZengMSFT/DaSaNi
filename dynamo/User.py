@@ -17,7 +17,7 @@ from doodle import helper
     Birthday       = str    =>  unix timestamp
     Email          = str        Indexed
     Password       = str
-    Phone          = str
+    Phone          = str        foramt:1aaabbbcccc!important
     School         = str        Indexed
     Major          = str        Indexed
     Gender         = Number   male => true  Indexed
