@@ -58,8 +58,12 @@ class ContactlistHandler(BaseHandler):
                 'reason' : 'invalid userid or friend id'
                 })
 
+
+
         for Id_to_add in add_list：
-            current_user.post(type='create', friend=Id_to_add)
+            current_user['FriendList'].list_append_item(Id_to_add)
+
+        current_user.put()
             
         self.write_json({
             'result' : 'ok'
