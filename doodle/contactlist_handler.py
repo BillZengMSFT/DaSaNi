@@ -37,16 +37,30 @@ class ContactlistHandler(BaseHandler):
         email_result = user_table.batch_get(keys=email_list)
     	phone_result = user_table.batch_get(keys=phone_list)
 
-    	return_list = []
+    	add_list = []
 
     	for user in email_result:
     		if user['UserID'] != '':
-    			return_list.append({'UserID' : user['UserID']})
+    			add_list.append(user['UserID'])
 
     	for user in phone_result:
     		if user['UserID'] != '':
     			email_id, school_name = user['Email'].split('@')
     			if school_name == email_provider:
-    				reutrn_list.append({'UserID' : user['UserID']})
+    				add_list.append(['UserID'])
 
-    	return return_list
+    	try:
+            current_user = self.user_friend_table.get_item(self.current_userid)
+           
+        except:
+            self.write_json_with_status(400,{
+                'result' : 'fail',
+                'reason' : 'invalid userid or friend id'
+                })
+
+        for Id_to_add in add_list：
+            current_user.post(type='create', friend=Id_to_add)
+            
+        self.write_json({
+            'result' : 'ok'
+            })
