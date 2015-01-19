@@ -33,10 +33,9 @@ class ContactlistHandler(BaseHandler):
     		else
     			phone_list.append({'Phone' : contact['Phone']})
 
-    	user_list = current_user['FriendList'].split(';')
-
-    	email_result = user_list.batch_get(keys=email_list)
-    	phone_result = user_list.batch_get(keys=phone_list)
+    	
+        email_result = user_table.batch_get(keys=email_list)
+    	phone_result = user_table.batch_get(keys=phone_list)
 
     	return_list = []
 
