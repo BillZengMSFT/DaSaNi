@@ -10,16 +10,15 @@
 PAYLOAD:
 
         {
-            "UserID"    :   "UserID"
             "Email"      :   "email address"
             "contacts"    :   [
                 {
-                    "Email" : "email address",
-                    "Phone" : "phone number"
+                    "Email" : "email address or ;",
+                    "Phone" : "phone number or ;"
                 },
                 {
-                    "Email" : "email address",
-                    "Phone" : "phone number"
+                    "Email" : "email address or ;",
+                    "Phone" : "phone number or ;"
                 },
                 ...
             ]
