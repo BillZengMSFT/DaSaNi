@@ -152,6 +152,14 @@ def get_sns():
         aws_secret_access_key=config.AWS_ACCESS_KEY)
     return conn
 
+def get_sns_east():
+
+    conn = boto.sns.connect_to_region(
+        config.AWS_SNS_MESSAGE_REGION,
+        aws_access_key_id=config.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=config.AWS_ACCESS_KEY)
+    return conn
+
 def get_ses():
 
     conn = boto.ses.connect_to_region(
@@ -184,6 +192,11 @@ def get_app():
     settings = get_settings()
     sqs = get_sqs()
     sns = get_sns()
+<<<<<<< HEAD
+=======
+    ses = get_ses()
+    sns_east = get_sns_east()
+>>>>>>> cd6b4353a05f3c00ca5886693ee73fb48bf8bb61
     dynamo = get_dynamo()
     memcache = get_memcache()
     
@@ -192,6 +205,7 @@ def get_app():
         sqs = sqs,
         sns = sns,
         ses = ses,
+        sns_east = sns_east,
         dynamo = dynamo,
         memcache = memcache,
         **settings

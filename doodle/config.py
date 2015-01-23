@@ -1,8 +1,8 @@
 #encoding: utf-8
 AWS_REGION = 'us-west-2'
+AWS_SNS_MESSAGE_REGION = 'us-east-1'
 
-AWS_REGION = 'us-west-2'
-
+AWS_SNS_MESSAGE_ARN = 'arn:aws:sns:us-east-1:878165105740:Phone'
 AWS_SNS_IOS_APP_ARN = 'arn:aws:sns:us-west-2:878165105740:app/APNS_SANDBOX/CarlorTest'
 AWS_ACCESS_KEY_ID = 'AKIAJNDFKACQ6253GVXQ'
 AWS_ACCESS_KEY = 'uOvbYfrPeE3hkNIHy9PZrPVNq445nmdPQkl6f33h'
