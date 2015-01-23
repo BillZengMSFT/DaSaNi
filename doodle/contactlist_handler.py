@@ -25,46 +25,54 @@ class ContactlistHandler(BaseHandler):
     	email_list = []
     	phone_list = []
 
+        # fetch by ppl's email or phone
     	for contact in contact_list:
-    		if contact['Email'] != '':
+    		if contact['Email'] != ';':
     			contact_emailid, contact_emailprovider = contact['Email'].split('@')
+                # same school required
     			if contact_emailprovider == email_provider:
     				email_list.append({'Email' : contact_emailprovider})
-    		else
+    		elif contact['Phone'] != ';'
     			phone_list.append({'Phone' : contact['Phone']})
 
-    	
+    	# filter out users
         email_result = user_table.batch_get(keys=email_list)
     	phone_result = user_table.batch_get(keys=phone_list)
 
-    	add_list = []
+    	to_be_friend_list = []
 
     	for user in email_result:
-    		if user['UserID'] != '':
-    			add_list.append(user['UserID'])
+    		to_be_friend_list.append(user['UserID'])
 
     	for user in phone_result:
-    		if user['UserID'] != '':
-    			email_id, school_name = user['Email'].split('@')
-    			if school_name == email_provider:
-    				add_list.append(['UserID'])
+    		email_id, school_name = user['Email'].split('@')
+            # same school required
+    		if school_name == email_provider:
+    			to_be_friend_list.append(user['UserID'])
 
-    	try:
-            current_user = self.user_friend_table.get_item(self.current_userid)
-           
-        except:
-            self.write_json_with_status(400,{
-                'result' : 'fail',
-                'reason' : 'invalid userid or friend id'
-                })
-
-
-
-        for Id_to_add in add_list：
-            current_user['FriendList'].list_append_item(Id_to_add)
+        # add mutual friends
+        current_user = self.user_friend_table.get_item(self.current_userid)
+        for to_be_friend_userid in to_be_friend_list:
+            to_be_friend_user = self.user_friend_table.get_item(to_be_friend_userid)
+            # check if the userid duplicates in current user
+            rel_friend = re.search(to_be_friend_userid, current_user['FriendList'])
+            if rel_friend == None:
+                current_user['FriendList'] = list_append_item(to_be_friend_userid, current_user['FriendList'])
+            # check if the userid duplicates in friend user
+            rel_friend = re.search(self.current_userid, to_be_friend_user['FriendList'])
+            if rel_friend == None:
+                to_be_friend_user['FriendList'] = list_append_item(self.current_userid, to_be_friend_user['FriendList'])
+                to_be_friend_user.put()
 
         current_user.put()
-            
+
         self.write_json({
             'result' : 'ok'
-            })
+        })
+
+
+
+
+
+
+
