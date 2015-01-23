@@ -62,17 +62,22 @@ class PhoneHandler(BaseHandler):
                 })
         all_sub = self.sns_east.get_all_subscriptions_by_topic(config.AWS_SNS_MESSAGE_ARN)
 
+        try:
+            for sub in all_sub['ListSubscriptionsByTopicResponse']['ListSubscriptionsByTopicResult']['Subscriptions']:
+                if sub['Endpoint'] == user_phone_number and sub['SubscriptionArn'] != 'PendingConfirmation':
+                    # update user infomation
+                    user['PhoneActive'] = True
+                    user.put()
 
-        for sub in all_sub['ListSubscriptionsByTopicResponse']['ListSubscriptionsByTopicResult']['Subscriptions']:
-            if sub['Endpoint'] == user_phone_number and sub['SubscriptionArn'] != 'PendingConfirmation':
-                # update user infomation
-                user['PhoneActive'] = True
-                user.put()
-
-                # send message back to client
-                self.write_json_with_status(200,{
-                    'result' : 'ok'
+                    # send message back to client
+                    self.write_json_with_status(200,{
+                        'result' : 'ok'
                     })
+        except:
+            self.write_json_with_status(500,{
+                'result' : 'fail',
+                'reason' : 'AWS does not return a valid dictionary',
+                }
 
 
         # number not found
