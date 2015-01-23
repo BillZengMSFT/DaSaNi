@@ -114,6 +114,9 @@ Other places:
 ```
 
 ```
+Field in dynamo:
+empty field doesn't exist, need try and catch to test a field
+
 List in dynamo:
 
 empty list is ';'
