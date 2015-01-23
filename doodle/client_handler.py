@@ -1,11 +1,13 @@
 #encoding: utf-8
 
 import tornado
+
 from .config import *
 from tornado import gen
 from .base_handler import *
 
 class ClientHandler(BaseHandler):
+
 
     @property
     def user_apns_sns_table(self):
@@ -43,10 +45,6 @@ class ClientHandler(BaseHandler):
         self.write_json({
             'result' : 'ok'
             })
-
-
-
-
 
 
 
