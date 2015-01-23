@@ -48,6 +48,7 @@ def noosa(queue):
     attrs = {
         'RecordID'      : hash_key,
         'UserID'        : message['from'],
+        'TopicARN'      : topic_arn,
         'JsonMessage'   : json_string,
         'Timestamp'     : message['timestamp']
     }
