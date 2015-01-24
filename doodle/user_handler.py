@@ -15,11 +15,11 @@ class UserHandler(BaseHandler):
 
     @property
     def user_table(self):
-        return self.dynamo.get_table(USER_TABLE)
+        return Table('User_Table',connection=self.dynamo)
 
     @property
     def user_activate_table(self):
-        return self.dynamo.get_table(USER_ACTIVATE_TABLE)
+        return Table('User_Activate_Table',connection=self.dynamo)
 
     @gen.coroutine
     def post(self):
@@ -35,7 +35,7 @@ class UserHandler(BaseHandler):
 
         # Check if this email has been registered
                
-        user_exist = yield gen.maybe_future(self.user_table.has_item(hashed_userid))
+        user_exist = yield gen.maybe_future(self.user_table.has_item(UserID=hashed_userid))
 
         if user_exist == True:
 
@@ -49,21 +49,17 @@ class UserHandler(BaseHandler):
 
         hashed_password = hash_password(password)
         
-        # Build attrs for the new user
-
-        attrs = {
-            "Email"         : self.data["email"],
-            "FirstName"     : self.data['firstname'],
-            "LastName"      : self.data['lastname'],
-            "AccountActive" : False,
-            "Password"      : hashed_password,
-        }
+     
         # Create new user item and upload it to database
-        new_user = self.user_table.new_item(
-            hash_key=hashed_userid,
-            range_key=None,
-            attrs=attrs
-            )
+        yield gen.maybe_future(self.user_table.put_item(data={
+                "UserID" : hashed_userid,
+                "Email"         : self.data["email"],
+                "FirstName"     : self.data['firstname'],
+                "LastName"      : self.data['lastname'],
+                "AccountActive" : False,
+                "Password"      : hashed_password,
+            }
+        ))
         # Send activate email
         try:
             activate_code = yield gen.maybe_future(
@@ -80,21 +76,13 @@ class UserHandler(BaseHandler):
                 'reason' : 'failed to send email'
             })
 
-        activator_attrs = {
+        yield gen.maybe_future(new_user_activator = self.user_activate_table.put_item(data={
+            "UserID" : hashed_userid,
             "Timestamp" : str(time.time()).split(".")[0],
             "Code"      : activate_code,
             "Attempt"   : 1
-        }
-        
-        new_user_activator = self.user_activate_table.new_item(
-            hash_key=hashed_userid,
-            range_key=None,
-            attrs=activator_attrs
-            )
+        }))
 
-        # Upload new user information and activator to AWS
-        yield gen.maybe_future(new_user.put())
-        yield gen.maybe_future(new_user_activator.put())
         # Only send userid back to the client
 
         self.write_json({
@@ -107,7 +95,7 @@ class UserHandler(BaseHandler):
     @gen.coroutine
     def put(self):
         self.input_firewall(self.data)
-        user = self.user_table.get_item(self.current_userid)
+        user = self.user_table.get_item(UserID=self.current_userid)
         try:
             # if we are updating password, hash it
             if self.data['password']:
@@ -128,7 +116,7 @@ class UserHandler(BaseHandler):
     def get(self, userid=''):
         if userid == '':
             userid = self.current_userid
-        user = self.user_table.get_item(userid)
+        user = self.user_table.get_item(UserID= suserid)
         # filter output information
         user_data = self.output_firewall(user)
         self.write_json({

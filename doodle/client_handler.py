@@ -5,13 +5,14 @@ import tornado
 from .config import *
 from tornado import gen
 from .base_handler import *
+from boto.dynamodb2.table import Table
 
 class ClientHandler(BaseHandler):
 
 
     @property
     def user_apns_sns_table(self):
-        return self.dynamo.get_table(USER_APNS_SNS_TABLE)
+        return Table('User_APNs_SNS_Table',connection=self.dynamo)
 
 
     @gen.coroutine
@@ -37,11 +38,13 @@ class ClientHandler(BaseHandler):
             'SNSToken'  : aws_endpoint_arn,
             'UserID'    : ';'
             }
-        item = self.user_apns_sns_table.new_item(
-            hash_key=self.data['deviceToken'],
-            attrs=attrs
-        )
-        yield gen.maybe_future(item.put())
+        item =  yield gen.maybe_future(self.user_apns_sns_table.put_item(data={
+                'APNsToken' : self.data['deviceToken'], 
+                'SNSToken'  : aws_endpoint_arn,
+                'UserID'    : ';'
+            }
+        ))
+       
         self.write_json({
             'result' : 'ok'
             })

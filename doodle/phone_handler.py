@@ -7,12 +7,12 @@ from .config import *
 from tornado import gen
 from .base_handler import *
 from .helper import *
-from boto.dynamodb.condition import *
+from boto.dynamodb2.table import Table
 
 class PhoneHandler(BaseHandler):
     @property 
     def user_table(self):
-        return self.dynamo.get_table(USER_TABLE)
+        return Table('User_Table',connection=self.dynamo)
 
     @async_login_required
     @gen.coroutine
@@ -52,7 +52,7 @@ class PhoneHandler(BaseHandler):
         """
         check if current user has subscribed to message topic
         """
-        user = self.user_table.get_item(self.current_userid)
+        user = self.user_table.get_item(UserID=self.current_userid)
         try:
             user_phone_number = user['Phone']
         except:
@@ -67,7 +67,7 @@ class PhoneHandler(BaseHandler):
                 if sub['Endpoint'] == user_phone_number and sub['SubscriptionArn'] != 'PendingConfirmation':
                     # update user infomation
                     user['PhoneActive'] = True
-                    user.put()
+                    user.partial_save()
 
                     # send message back to client
                     self.write_json_with_status(200,{

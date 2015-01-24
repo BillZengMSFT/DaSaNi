@@ -15,12 +15,12 @@
 
 import json
 from config import *
-
+from boto.dynamodb2.table import Table
 
 sqs = get_sqs()
 sns = get_sns()
 dynamo = get_dynamo()
-chat_record_table = dynamo.get_table(CHAT_RECORD_TABLE)
+chat_record_table = Table(CHAT_RECORD_TABLE,connection=dynamo)
 
 
 """
@@ -45,18 +45,15 @@ def noosa(queue):
     )
     # store to dynamo db
     hash_key = md5(json_string)
-    attrs = {
+
+    new_record = self.table.put_item(data={
         'RecordID'      : hash_key,
         'UserID'        : message['from'],
         'TopicARN'      : topic_arn,
         'JsonMessage'   : json_string,
         'Timestamp'     : message['timestamp']
-    }
-    new_record = self.table.new_item(
-        hash_key=hash_key,
-        attrs=attrs
-    )
-    new_record.put()
+    })
+    
     # remove this message
     sqs.delete_message(queue, message_object)
 

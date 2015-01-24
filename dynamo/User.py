@@ -35,10 +35,10 @@ from doodle import helper
 
 @gen.coroutine
 def verify_pwd(email, pwd, dynamo):
-    user_table = dynamo.get_table(config.USER_TABLE)
-    user_data_exist = user_table.has_item(helper.md5(email))
+    user_table = Table('User_Table',connection=dynamo)
+    user_data_exist = user_table.has_item(Email=helper.md5(email))
     if user_data_exist:
-        user_data = user_table.get_item(helper.md5(email))
+        user_data = user_table.get_item(Email=helper.md5(email))
     else:
         return None
     if user_data["Password"] == helper.hash_password(pwd):

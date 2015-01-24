@@ -7,14 +7,14 @@ from .config import *
 from tornado import gen
 from .base_handler import *
 from .helper import *
-from boto.dynamodb.condition import *
+from boto.dynamodb2.table import Table
 from operator import attrgetter
 
 class CommentHandler(BaseHandler):
 
     @property 
     def event_comment_table(self):
-        return self.dynamo.get_table(EVENT_COMMENT_TABLE)
+        return self.dynamo.Table('Event_Comment_Table',connection=self.dynamo)
 
     @async_login_required
     @gen.coroutine
@@ -35,18 +35,14 @@ class CommentHandler(BaseHandler):
         now = str(time.time())
         comment_id = md5(client_data['content']+now)
 
-        attrs = {
-            'CommentID' : comment_id,
-            'CreatorID' : creator_id,
-            'Content'   : content,
-            'EventID'   : event_id,
-            'Timestamp' : now
-        }
-
-        new_comment = self.event_comment_table.new_item(
-            hash_key=comment_id,
-            attrs=attrs)
-        new_comment.put()
+        new_comment = self.event_comment_table.put_item(data={
+                'CommentID' : comment_id,
+                'CreatorID' : creator_id,
+                'Content'   : content,
+                'EventID'   : event_id,
+                'Timestamp' : now
+            })
+       
 
         self.write_json({
             'comment_id' : comment_id
@@ -69,7 +65,7 @@ class CommentHandler(BaseHandler):
         comment_id = client_data['comment_id']
 
         try:
-            comment = self.event_comment_table.get_item(comment_id)
+            comment = self.event_comment_table.get_item(CommentID=comment_id)
         except:
             self.write_json_with_status(400,{
                 'result' : 'fail',
@@ -84,7 +80,7 @@ class CommentHandler(BaseHandler):
 
         comment['Coentent'] = client_data['data']
         comment['Timestamp'] = str(time.time())
-        comment.put()
+        comment.partial_save();
 
         self.write_json({
             'comment_id' : comment_id,
@@ -106,7 +102,7 @@ class CommentHandler(BaseHandler):
         comment_id = client_data['comment_id']
 
         try:
-            comment = self.event_comment_table.get_item(comment_id)
+            comment = self.event_comment_table.get_item(CommentID=comment_id)
         except:
             self.write_json_with_status(400,{
                 'result' : 'fail',
@@ -153,11 +149,9 @@ class CommentHandler(BaseHandler):
             })
 
         comments = self.event_comment_table.scan(
-            {
-                'EventID' : EQ(event_id),
-                'Timestamp' : LE(timestamp)
-            },
-            max_result=limit
+            EventID__eq=event_id,
+            Timestamp_le=timestamp,
+            limit=limit
         )
 
         response = []

@@ -6,15 +6,16 @@ from tornado import gen
 from .base_handler import BaseHandler
 from .config import *
 from .helper import *
+from boto.dynamodb2.table import Table
 
 class PasswordHandler(BaseHandler):
     @property
     def user_table(self):
-        return self.dynamo.get_table(USER_TABLE)
+        return Table('User_Table',connection=self.dynamo)
 
     @property
     def user_activate_table(self):
-        return self.dynamo.get_table(USER_ACTIVATE_TABLE)
+        return Table('User_Activate_Table',connection=self.dynamo)
 
     @gen.coroutine
     def post():
@@ -29,7 +30,7 @@ class PasswordHandler(BaseHandler):
         userid = client_data['userid']
         try:
             # fetch user data from dynamodb
-            user = yield gen.maybe_future(self.user_table.get_item(userid))
+            user = yield gen.maybe_future(self.user_table.get_item(UserID=userid))
         except:
             self.write_json_with_status(400,{
                 'result' : 'fail',
@@ -51,21 +52,15 @@ class PasswordHandler(BaseHandler):
                 'result' : 'fail',
                 'reason' : 'failed to send email'
             })
-
-        activator_attrs = {
+        
+        # save activator code to dynamodb
+       yield gen.maybe_future(self.user_activate_table.put_item(data={
+            "UserID" : userid,
             "Timestamp" : str(time.time()).split(".")[0],
             "Code"      : activate_code,
             "Attempt"   : 1
-        }
-        
-        # save activator code to dynamodb
-        new_user_activator = self.user_activate_table.new_item(
-            hash_key=userid,
-            range_key=None,
-            attrs=activator_attrs
-            )
-
-        yield gen.maybe_future(new_user_activator.put())
+            }
+        ))
 
         self.write_json({
             'result': 'ok',
@@ -77,7 +72,7 @@ class PasswordHandler(BaseHandler):
             verify code from client
         """
         try:
-            activator = yield gen.maybe_future(self.user_activate_table.get_item(userid))
+            activator = yield gen.maybe_future(self.user_activate_table.get_item(UserID=userid))
         except:
             self.write_json_with_status(400,{
                 'result' : 'fail',
@@ -104,8 +99,8 @@ class PasswordHandler(BaseHandler):
             }
         """
         try:
-            activator = yield gen.maybe_future(self.user_activate_table.get_item(userid))
-            user = yield gen.maybe_future(self.user_table.get_item(userid))
+            activator = yield gen.maybe_future(self.user_activate_table.get_item(UserID=userid))
+            user = yield gen.maybe_future(self.user_table.get_item(UserID=userid))
         except:
             self.write_json_with_status(400,{
                 'result' : 'fail',
@@ -140,7 +135,7 @@ class PasswordHandler(BaseHandler):
 
         activator['Code'] = activate_code
 
-        yield gen.maybe_future(activator.put())
+        yield gen.maybe_future(activator.partial_save())
 
         self.write_json({
             'result':'ok'

@@ -11,8 +11,8 @@ sqs = get_sqs()
 sns = get_sns()
 dynamo = get_dynamo()
 
-user_activate_table = dynamo.get_table(USER_ACTIVATE_TABLE)
-user_table = dynamo.get_table(USER_TABLE)
+user_activate_table = Table(USER_ACTIVATE_TABLE,connection=dynamo)
+user_table = Table(USER_TABLE,connection=dynamo)
 
 """
     Polling check if activation code expires and if so delete such code and user
@@ -21,14 +21,14 @@ user_table = dynamo.get_table(USER_TABLE)
 def use_towelpaper():
     yesterday = datetime.date.today() - datetime.timedelta(1)
     yesterday_unix_time = yesterday.strftime("%s")
-    expired_codes = user_activate_table.scan({
-        'Timestamp': LE(yesterday_unix_time)
-    })
+    expired_codes = user_activate_table.scan(
+        Timestamp__le=yesterday_unix_time
+    )
     expired_count = 0
     for expired_code in expired_codes:
         userid = expired_code['UserID']
         expired_code.delete()
-        user = user_table.get_item(userid)
+        user = user_table.get_item(UserID=userid)
         # Avoid reset password mis-delete
         if user['AccountActive'] != True:
             user.delete()
