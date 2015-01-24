@@ -37,8 +37,8 @@ class ContactlistHandler(BaseHandler):
     			phone_list.append({'Phone' : contact['Phone']})
 
     	# filter out users
-        email_result = user_table.batch_get(keys=email_list)
-    	phone_result = user_table.batch_get(keys=phone_list)
+        email_result = user_table.scan(Email_in=email_list)
+    	phone_result = user_table.scan(Phone_in=phone_list)
 
     	to_be_friend_list = []
 
