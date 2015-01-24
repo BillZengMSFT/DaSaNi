@@ -192,11 +192,8 @@ def get_app():
     settings = get_settings()
     sqs = get_sqs()
     sns = get_sns()
-<<<<<<< HEAD
-=======
     ses = get_ses()
     sns_east = get_sns_east()
->>>>>>> cd6b4353a05f3c00ca5886693ee73fb48bf8bb61
     dynamo = get_dynamo()
     memcache = get_memcache()
     
