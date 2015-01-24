@@ -9,6 +9,7 @@ import time
 import re
 from .config import *
 import hashlib
+from boto.dynamodb2.table import Table
 from .helper import *
 
 class UserHandler(BaseHandler):
