@@ -54,13 +54,14 @@ class PasswordHandler(BaseHandler):
             })
         
         # save activator code to dynamodb
-       yield gen.maybe_future(self.user_activate_table.put_item(data={
-            "UserID" : userid,
-            "Timestamp" : str(time.time()).split(".")[0],
-            "Code"      : activate_code,
-            "Attempt"   : 1
-            }
-        ))
+        yield gen.maybe_future(
+            self.user_activate_table.put_item(data={
+                "UserID"    : userid,
+                "Timestamp" : str(time.time()).split(".")[0],
+                "Code"      : activate_code,
+                "Attempt"   : 1
+                })
+        )
 
         self.write_json({
             'result': 'ok',
