@@ -77,12 +77,14 @@ class UserHandler(BaseHandler):
                 'reason' : 'failed to send email'
             })
 
-        yield gen.maybe_future(new_user_activator = self.user_activate_table.put_item(data={
-            "UserID" : hashed_userid,
+        yield gen.maybe_future(
+            self.user_activate_table.put_item(data={
+            "UserID"    : hashed_userid,
             "Timestamp" : str(time.time()).split(".")[0],
             "Code"      : activate_code,
             "Attempt"   : 1
-        }))
+            })
+        )
 
         # Only send userid back to the client
 
