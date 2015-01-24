@@ -13,3 +13,4 @@ boto
 motorengine
 blinker
 pylibmc
+werkzeug

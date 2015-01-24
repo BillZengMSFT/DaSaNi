@@ -6,29 +6,30 @@ import re
 from .config import *
 from tornado import gen
 from .base_handler import *
+from boto.dynamodb2.table import Table
 from .helper import *
 
 class EventHandler(BaseHandler):
 
     @property 
     def chatgroup_table(self):
-        return self.dynamo.get_table(CHATGROUP_TABLE)
+        return Table(CHATGROUP_TABLE, connection=self.dynamo)
 
     @property 
     def user_table(self):
-        return self.dynamo.get_table(USER_TABLE)
+        return Table(USER_TABLE, connection=self.dynamo)
 
     @property 
     def user_inbox_table(self):
-        return self.dynamo.get_table(USER_INBOX_TABLE)
+        return Table(USER_INBOX_TABLE, connection=self.dynamo)
 
     @property
     def event_table(self):
-        return self.dynamo.get_table(EVENT_TABLE)
+        return Table(EVENT_TABLE, connection=self.dynamo)
 
     @property
     def user_event_table(self):
-        return self.dynamo.get_table(USER_EVENT_TABLE)
+        return Table(USER_EVENT_TABLE, connection=self.dynamo)
 
     """
         Create a new event
@@ -64,16 +65,12 @@ class EventHandler(BaseHandler):
             'Capacity'      : client_data['capacity'],
             'Official'      : official
         }
-        new_event = self.event_table.new_item(
-            hash_key = event_id,
-            range_key = None,
-            attrs = attrs
-            )
+        new_event = self.event_table.put_item(data=attrs)
 
-        current_user = self.user_event_table.get_item(self.current_userid)
+        current_user = self.user_event_table.get_item(UserID=self.current_userid)
         current_user['EventList'] = list_append_item(event_id, current_user['EventList'])
-        current_user.put()
-        new_event.put()
+        current_user.save()
+        new_event.save()
         self.write_json({
             'event_id' : event_id
             })
@@ -107,7 +104,7 @@ class EventHandler(BaseHandler):
     def __event_application(self,who_apply,event_id,who_decide,choice, inbox_message_id):
         if choice == "accept":
             try:
-                event = self.event_table.get_item(event_id)
+                event = self.event_table.get_item(EventID=event_id)
             except:
                 self.write_json_with_status(400,{
                     'result' : 'fail',
@@ -115,10 +112,10 @@ class EventHandler(BaseHandler):
                     })
             if re.search(who_apply, event['MemberList']) == None:
                 event['MemberList'] = list_append_item(event['MemberList'], who_apply)
-                event.put()
+                event.save()
                 # delete inbox message
                 try:
-                    inbox_message = self.user_inbox_table.get_item(inbox_message_id)
+                    inbox_message = self.user_inbox_table.get_item(MessageID=inbox_message_id)
                 except:
                     self.write_json_with_status(400,{
                         'result' : 'fail',
@@ -142,7 +139,7 @@ class EventHandler(BaseHandler):
             
     def __event_leave(self, who_leave, event_id, inbox_message_id):
         try:
-            event = self.event_table.get_item(event_id)
+            event = self.event_table.get_item(EventID=event_id)
         except:
             self.write_json_with_status(400,{
                 'result' : 'fail',
@@ -150,11 +147,11 @@ class EventHandler(BaseHandler):
                 })
         if re.search(who_leave, event['MemberList']) != None and self.current_userid != event['CreatorID']:
             event['MemberList'] = list_delete_item(who_leave + ".*?;", event['MemberList'])
-            event.put()
+            event.save()
 
         # delete inbox message
         try:
-            inbox_message = self.user_inbox_table.get_item(inbox_message_id)
+            inbox_message = self.user_inbox_table.get_item(MessageID=inbox_message_id)
         except:
             self.write_json_with_status(400,{
                 'result' : 'fail',
@@ -168,21 +165,21 @@ class EventHandler(BaseHandler):
     def __event_update(self, attrs, event_id):
         self.input_firewall(attrs)
         try:
-            event = self.event_table.get_item(event_id)
+            event = self.event_table.get_item(EventID=event_id)
         except:
             self.write_json_with_status(400,{
                 'result' : 'fail',
                 'reason' : 'invalid event id'
             })
         event.update(client_name_filter(attrs))
-        event.put()
+        event.save()
         self.write_json({'result' : 'OK'})
 
 
 
     def __event_like(self, current_userid, event_id):
         try:
-            event = self.event_table.get_item(event_id)
+            event = self.event_table.get_item(EventID=event_id)
         except:
             self.write_json_with_status(400,{
                 'result' : 'fail',
@@ -213,7 +210,7 @@ class EventHandler(BaseHandler):
         if timestamp == '0':
             response = {}
             try:
-                event = self.event_table.get_item(event_id)
+                event = self.event_table.get_item(EventID=event_id)
             except:
                 self.write_json_with_status(400,{
                     'result' : 'fail',
@@ -242,11 +239,9 @@ class EventHandler(BaseHandler):
                     'reason' : 'limit is too low or too high'
                 })
             events = self.event_table.scan(
-                {
-                    'EventID' : EQ(event_id),
-                    'Timestamp' : LE(timestamp)
-                },
-                max_result=limit
+                EventID__eq=event_id,
+                Timestamp__le=timestamp,
+                limit=limit
             )
             response = []
             for event in events:

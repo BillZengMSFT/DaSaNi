@@ -5,29 +5,30 @@ import json
 from tornado import gen
 from .base_handler import BaseHandler
 from .config import *
+from boto.dynamodb2.table import Table
 from .helper import *
 
 
 class ActivateHandler(BaseHandler):
     @property
     def user_table(self):
-        return self.dynamo.get_table(USER_TABLE)
+        return Table(USER_TABLE, connection=self.dynamo)
 
     @property
     def user_activate_table(self):
-        return self.dynamo.get_table(USER_ACTIVATE_TABLE)
+        return Table(USER_ACTIVATE_TABLE, connection=self.dynamo)
 
     @property
     def user_topic_table(self):
-        return self.dynamo.get_table(USER_TOPIC_TABLE)
+        return Table(USER_TOPIC_TABLE, connection=self.dynamo)
 
     @property
     def user_friend_table(self):
-        return self.dynamo.get_table(USER_FRIEND_TABLE)
+        return Table(USER_FRIEND_TABLE, connection=self.dynamo)
 
     @property
     def user_event_table(self):
-        return self.dynamo.get_table(USER_EVENT_TABLE)
+        return Table(USER_EVENT_TABLE, connection=self.dynamo)
 
     @gen.coroutine
     def post(self):
@@ -45,37 +46,36 @@ class ActivateHandler(BaseHandler):
         userid          = self.data['userid']
 
         # if the code is true then activate the account
-        code_is_real    =  self.user_activate_table.has_item(userid)
+        code_is_real    =  self.user_activate_table.has_item(UserID=userid)
         if code_is_real:
-            activator = yield gen.maybe_future(self.user_activate_table.get_item(userid))
+            activator = yield gen.maybe_future(self.user_activate_table.get_item(UserID=userid))
             if activator['Code'] == code:
-                user_data = self.user_table.get_item(userid)
+                user_data = self.user_table.get_item(UserID=userid)
                 user_data['AccountActive'] = True
-                yield gen.maybe_future(user_data.put())
+                yield gen.maybe_future(user_data.partial_save())
                 yield gen.maybe_future(activator.delete())
 
                 # create items in tables for the new account
-                new_user_topic_list= self.user_topic_table.new_item(
-                    hash_key=userid,
-                    range_key=None,
-                    attrs={"TopicList" : ";"}
-                    )
+                new_user_topic_list = yield gen.maybe_future(
+                    self.user_topic_table.put_item(data={
+                    'UserID'    : userid,
+                    "TopicList" : ";"
+                    })
+                )
 
-                new_user_friend_list= self.user_friend_table.new_item(
-                    hash_key=userid,
-                    range_key=None,
-                    attrs={"FriendList" : ";"}
-                    )
+                new_user_friend_list = yield gen.maybe_future(
+                    self.user_friend_table.put_item(data={
+                    'UserID'        : userid,
+                    "FriendList"    : ";"
+                    })
+                )
 
-                new_user_event_list = self.user_event_table.new_item(
-                    hash_key=userid,
-                    range_key=None,
-                    attrs={"EventList" : ";"}
-                    )
-                yield gen.maybe_future(new_user_topic_list.put())
-                yield gen.maybe_future(new_user_friend_list.put())
-                yield gen.maybe_future(new_user_event_list.put())
-
+                new_user_event_list = yield gen.maybe_future(
+                    self.user_event_table.put_item(data={
+                    'UserID'        : userid,
+                    "EventList"     : ";"
+                    })
+                )
 
                 self.write_json({
                     'result' : 'ok'
@@ -109,8 +109,8 @@ class ActivateHandler(BaseHandler):
         userid = self.data['userid']
         try:
             # try to retrieve user data and activator
-            user_data = yield gen.maybe_future(self.user_table.get_item(userid))
-            activator = yield gen.maybe_future(self.user_activate_table.get_item(userid))
+            user_data = yield gen.maybe_future(self.user_table.get_item(UserID=userid))
+            activator = yield gen.maybe_future(self.user_activate_table.get_item(UserID=userid))
         except:
             self.write_json_with_status(400,{
                 'result' : 'fail',
@@ -141,7 +141,7 @@ class ActivateHandler(BaseHandler):
 
         activator['Code'] = activate_code
 
-        yield gen.maybe_future(activator.put())
+        yield gen.maybe_future(activator.partial_save())
 
         self.write_json({
             'result':'ok'
@@ -154,7 +154,7 @@ class ActivateHandler(BaseHandler):
             Retrieve if an account is activated or not
         '''
         try:
-            user_data = yield gen.maybe_future(self.user_table.get_item(userid))
+            user_data = yield gen.maybe_future(self.user_table.get_item(UserID=userid))
         except:
             self.write_json_with_status(400,{
                 'result' : 'fail',

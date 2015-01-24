@@ -8,6 +8,8 @@ from functools import wraps
 import hashlib
 from tornado.escape import json_encode
 from .helper import *
+
+
 class BaseHandler(tornado.web.RequestHandler):
 
     @property

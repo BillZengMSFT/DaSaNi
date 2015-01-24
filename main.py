@@ -14,7 +14,7 @@ import time
 import boto.sqs
 import boto.sns
 import boto.ses
-import boto.dynamodb
+import boto.dynamodb2
 import pylibmc
 
 from tornado.httpserver import HTTPServer
@@ -170,7 +170,7 @@ def get_ses():
 
 def get_dynamo():
 
-    conn = boto.dynamodb.connect_to_region(
+    conn = boto.dynamodb2.connect_to_region(
         config.AWS_REGION,
         aws_access_key_id=config.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=config.AWS_ACCESS_KEY)

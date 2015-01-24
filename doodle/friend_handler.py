@@ -6,17 +6,18 @@ from tornado import gen
 from .base_handler import *
 import re
 from .helper import *
+from boto.dynamodb2.table import Table
 
 
 class FriendHandler(BaseHandler):
 
     @property 
     def user_friend_table(self):
-        return self.dynamo.get_table(USER_FRIEND_TABLE)
+        return Table(USER_FRIEND_TABLE, connection=self.dynamo)
 
     @property 
     def user_table(self):
-        return self.dynamo.get_table(USER_TABLE)
+        return Table(USER_TABLE, connection=self.dynamo)
 
     @async_login_required
     @gen.coroutine
@@ -35,8 +36,8 @@ class FriendHandler(BaseHandler):
         elif client_data['type'] == 'create':
             friend_user_id = client_data['friend']
             try:
-                current_user = self.user_friend_table.get_item(self.current_userid)
-                friend_user = self.user_friend_table.get_item(friend_user_id)
+                current_user = self.user_friend_table.get_item(UserID=self.current_userid)
+                friend_user = self.user_friend_table.get_item(UserID=friend_user_id)
             except:
                 self.write_json_with_status(400,{
                     'result' : 'fail',
@@ -46,12 +47,12 @@ class FriendHandler(BaseHandler):
             rel_friend = re.search(friend_user_id, current_user['FriendList'])
             if rel_friend == None:
                 current_user['FriendList'] = list_append_item(friend_user_id, current_user['FriendList'])
-                current_user.put()
+                current_user.save()
 
             rel_friend = re.search(self.current_userid, friend_user['FriendList'])
             if rel_friend == None:
                 friend_user['FriendList'] =list_append_item(self.current_userid, friend_user['FriendList'])
-                friend_user.put()
+                friend_user.save()
 
             self.write_json({
                 'result':'ok'
@@ -65,8 +66,8 @@ class FriendHandler(BaseHandler):
         friend_user_id = client_data['friend']
 
         try:
-            current_user = self.user_friend_table.get_item(self.current_userid)
-            friend_user = self.user_friend_table.get_item(friend_user_id)
+            current_user = self.user_friend_table.get_item(UserID=self.current_userid)
+            friend_user = self.user_friend_table.get_item(UserID=friend_user_id)
         except:
             self.write_json_with_status(400,{
                 'result' : 'fail',
@@ -80,7 +81,7 @@ class FriendHandler(BaseHandler):
                 friend_user_id + '.*?;',
                 current_user['FriendList']
                 )
-            current_user.put()
+            current_user.save()
 
         rel_friend = re.search(self.current_userid, friend_user['FriendList'])
         if rel_friend != None:
@@ -88,7 +89,7 @@ class FriendHandler(BaseHandler):
                 self.current_userid + '.*?;',
                 friend_user['FriendList']
                 )
-            friend_user.put()
+            friend_user.save()
 
         self.write_json({
             'result':'ok'
